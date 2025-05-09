@@ -115,11 +115,11 @@ onMounted(() => {
             <h1 class="hero-title">
               <span class="block">Master</span>
               <span class="gradient-text">Japanese</span>
-              <span class="block">with AI</span>
+              <span class="block">with Nyto</span>
             </h1>
             
             <p class="hero-subtitle">
-              Experience a revolutionary way to learn Japanese using adaptive AI that 
+              Experience a revolutionary way to learn Japanese using a modern app that 
               personalizes your journey and accelerates your progress to fluency.
             </p>
             
