@@ -70,19 +70,14 @@ onMounted(() => {
       {'nav-scrolled': isScrolled}
     ]">
     <!-- Logo & Navigation -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4">
+    <div class="max-w-7xl mx-auto p-0 sm:p-0 lg:p-0">
+      <div class="flex justify-between items-center h-18 px-4">
         <!-- Logo -->
         <div class="flex items-center">
-          <div class="relative group">
-            <a href="#" class="flex items-center space-x-1">
-              <div class="text-2xl md:text-3xl font-bold transition-colors duration-300 logo-text">
-                <span class="relative">
-                  N<span class="absolute -top-1 -right-1 text-xs logo-accent">日</span>
-                </span>yto<span class="logo-dot">.</span>ai
-              </div>
+          <div class="relative">
+            <a href="#" class="flex items-center">
+              <img src="@/assets/Logos/Logo.png" alt="Nyto.ai Logo" class="h-14 md:h-16" />
             </a>
-            <div class="absolute -bottom-1 left-0 w-0 h-0.5 logo-underline transition-all duration-300 group-hover:w-full"></div>
           </div>
         </div>
 
@@ -92,7 +87,7 @@ onMounted(() => {
             <div v-for="item in navItems" :key="item.id" class="relative">
               <button
                 @click="setActiveSection(item.id)"
-                class="px-4 py-2 rounded-full nav-item transition-all duration-300 relative overflow-hidden group"
+                class="px-3 py-1 rounded-full nav-item transition-all duration-300 relative overflow-hidden group text-sm"
                 :class="activeSection === item.id ? 'nav-item-active' : ''">
                 <span class="relative z-10">{{ item.label }}</span>
                 <span class="absolute inset-0 nav-item-bg transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
@@ -102,7 +97,7 @@ onMounted(() => {
           </div>
           
           <div class="ml-4 pl-4 border-l nav-divider">
-            <button class="px-6 py-2 rounded-full nav-cta-button transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+            <button class="px-4 py-1 rounded-full nav-cta-button transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-sm">
               Start Learning
             </button>
           </div>
@@ -123,17 +118,18 @@ onMounted(() => {
     <div 
       class="md:hidden transition-all duration-300 overflow-hidden mobile-menu"
       :class="isMenuOpen ? 'max-h-96 opacity-100 py-4' : 'max-h-0 opacity-0 py-0'">
-      <div class="px-4 sm:px-6 space-y-2">
+      <div class="p-4 sm:p-6 space-y-2">
         <button 
           v-for="item in navItems" 
           :key="item.id"
           @click="setActiveSection(item.id)"
-          class="block w-full text-left py-3 px-4 rounded-lg transition-all duration-200"
+          class="block w-full text-left py-3 p-4 rounded-lg transition-all duration-200"
           :class="activeSection === item.id ? 'mobile-nav-active' : 'mobile-nav-item'">
           {{ item.label }}
         </button>
         
-        <button class="w-full mt-4 px-6 py-3 rounded-full mobile-cta transition-all duration-300">
+        <button class="w-full mt-4 p-3 rounded-full mobile-cta transition-all duration-300"
+                style="padding-left: 1.5rem; padding-right: 1.5rem;">
           Start Learning
         </button>
       </div>
@@ -153,13 +149,14 @@ onMounted(() => {
 
 /* Navbar styling */
 header {
-  background-color: rgba(75, 59, 71, 0.1);
+  background-color: rgba(224, 216, 222, 0.95);
   backdrop-filter: blur(8px);
   transition: all 0.4s ease;
+  height: 70px;
 }
 
 .nav-scrolled {
-  background-color: rgba(75, 59, 71, 0.95);
+  background-color: rgba(224, 216, 222, 0.98);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
@@ -183,66 +180,70 @@ header {
 
 /* Navigation items */
 .nav-item {
-  color: rgba(207, 210, 178, 0.85);
+  color: var(--color-primary);
   font-weight: 500;
 }
 
 .nav-item:hover {
-  color: #CFD2B2;
+  color: #000;
 }
 
 .nav-item-active {
-  color: #CFD2B2;
+  color: #000;
   font-weight: 600;
 }
 
 .nav-item-bg {
-  background-color: rgba(207, 210, 178, 0.1);
+  background-color: rgba(75, 59, 71, 0.1);
 }
 
 .nav-divider {
-  border-color: rgba(207, 210, 178, 0.2);
+  border-color: rgba(75, 59, 71, 0.2);
 }
 
 .nav-cta-button {
-  background-color: #CFD2B2;
-  color: #4B3B47;
+  background-color: var(--color-primary);
+  color: var(--color-light);
   font-weight: 600;
-  box-shadow: 0 2px 10px rgba(207, 210, 178, 0.3);
+  box-shadow: 0 2px 10px rgba(75, 59, 71, 0.3);
 }
 
 .nav-cta-button:hover {
-  background-color: #d8dbc0;
-  box-shadow: 0 4px 15px rgba(207, 210, 178, 0.4);
+  background-color: #5a4956;
+  box-shadow: 0 4px 15px rgba(75, 59, 71, 0.4);
 }
 
 /* Mobile menu */
 .mobile-menu {
-  background-color: rgba(75, 59, 71, 0.98);
-  border-top: 1px solid rgba(207, 210, 178, 0.1);
+  background-color: rgba(224, 216, 222, 0.98);
+  border-top: 1px solid rgba(75, 59, 71, 0.1);
 }
 
 .mobile-nav-item {
-  color: rgba(207, 210, 178, 0.8);
-  background-color: rgba(207, 210, 178, 0.05);
+  color: var(--color-primary);
+  background-color: rgba(75, 59, 71, 0.05);
 }
 
 .mobile-nav-active {
-  color: #4B3B47;
-  background-color: #CFD2B2;
+  color: var(--color-light);
+  background-color: var(--color-primary);
   font-weight: 600;
 }
 
 .mobile-cta {
-  background-color: #CFD2B2;
-  color: #4B3B47;
+  background-color: var(--color-primary);
+  color: var(--color-light);
   font-weight: 600;
 }
 
 /* Hamburger icon */
 .hamburger-line {
-  @apply absolute block h-0.5 w-5 transition-all duration-300;
-  background-color: #CFD2B2;
+  position: absolute;
+  display: block;
+  height: 2px;
+  width: 20px;
+  transition: all 0.3s;
+  background-color: var(--color-primary);
 }
 
 .top-line {
@@ -266,10 +267,6 @@ button:hover .bottom-line {
 }
 
 /* When menu is open */
-.hamburger-line {
-  transition: all 0.3s;
-}
-
 button:focus .top-line,
 .isMenuOpen .top-line {
   transform: translateY(0) rotate(45deg);

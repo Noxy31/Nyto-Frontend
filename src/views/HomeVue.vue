@@ -2,13 +2,13 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 
 // Import all section components
-import Navbar from '../components/Navbar.vue';
-import HeroSection from '../components/HomeComponents/HeroSection.vue';
-import FeaturesSection from '../components/HomeComponents/FeaturesSection.vue';
-import LearningShowcase from '../components/HomeComponents/LearningShowcaseSection.vue';
-import TestimonialsSection from '../components/HomeComponents/TestimonialsSection.vue';
-import CTASection from '../components/HomeComponents/CTASection.vue';
-import FooterSection from '../components/Footer.vue';
+import Navbar from '@/components/Navbar.vue';
+import HeroSection from '@/components/HomeComponents/HeroSection.vue';
+import FeaturesSection from '@/components/HomeComponents/FeaturesSection.vue';
+import LearningShowcase from '@/components/HomeComponents/LearningShowcaseSection.vue';
+import TestimonialsSection from '@/components/HomeComponents/TestimonialsSection.vue';
+import CTASection from '@/components/HomeComponents/CTASection.vue';
+import FooterSection from '@/components/Footer.vue';
 
 // Parallax element interface
 interface ParallaxElement {
@@ -37,7 +37,6 @@ const sectionVisibility = reactive<Record<string, boolean>>({
 
 // Mouse follower effect state
 const mousePosition = reactive({ x: 0, y: 0 });
-const isHovering = ref<boolean>(false);
 
 // Parallax effect data
 const parallaxElements = reactive<ParallaxElement[]>([
@@ -74,28 +73,10 @@ const getParallaxStyle = (element: ParallaxElement): Record<string, string> => {
   };
 };
 
-// Mouse movement handler
+  // Mouse movement handler
 const handleMouseMove = (event: MouseEvent): void => {
   mousePosition.x = event.clientX;
   mousePosition.y = event.clientY;
-  
-  // Update hovering state for custom cursor
-  const hoverableElements = document.querySelectorAll('button, a, .hoverable');
-  let isHoveringElement = false;
-  
-  hoverableElements.forEach(element => {
-    const rect = element.getBoundingClientRect();
-    if (
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom
-    ) {
-      isHoveringElement = true;
-    }
-  });
-  
-  isHovering.value = isHoveringElement;
 };
 
 // Scroll handler for animations
@@ -187,14 +168,7 @@ onUnmounted(() => {
       </svg>
     </button>
     
-    <!-- Custom cursor effect for desktop -->
-    <div v-if="isHovering" class="fixed w-8 h-8 rounded-full pointer-events-none z-50 transition-transform duration-300 transform -translate-x-1/2 -translate-y-1/2 mix-blend-difference"
-         :style="{
-           left: `${mousePosition.x}px`,
-           top: `${mousePosition.y}px`,
-           backgroundColor: '#CFD2B2'
-         }">
-    </div>
+    <!-- Custom cursor effect removed -->
   </div>
 </template>
 
