@@ -10,18 +10,6 @@ import TestimonialsSection from '@/components/HomeComponents/TestimonialsSection
 import CTASection from '@/components/HomeComponents/CTASection.vue';
 import FooterSection from '@/components/Footer.vue';
 
-// Parallax element interface
-interface ParallaxElement {
-  id: number;
-  depth: number;
-  x: number;
-  y: number;
-  rotation: number;
-  size: number;
-  color: string;
-  opacity: number;
-}
-
 // Scroll animation state
 const scrollY = ref<number>(0);
 
@@ -35,48 +23,12 @@ const sectionVisibility = reactive<Record<string, boolean>>({
   action: false
 });
 
-// Mouse follower effect state
-const mousePosition = reactive({ x: 0, y: 0 });
-
-// Parallax effect data
-const parallaxElements = reactive<ParallaxElement[]>([
-  { id: 1, depth: 0.05, x: 20, y: 15, rotation: 10, size: 80, color: '#CFD2B2', opacity: 0.4 },
-  { id: 2, depth: 0.08, x: 70, y: 60, rotation: -5, size: 60, color: '#9C9990', opacity: 0.3 },
-  { id: 3, depth: 0.12, x: 85, y: 30, rotation: 15, size: 40, color: '#6A6262', opacity: 0.2 },
-  { id: 4, depth: 0.15, x: 10, y: 70, rotation: -20, size: 70, color: '#4B3B47', opacity: 0.15 }
-]);
-
 // Navigation
 const handleNavigation = (section: string): void => {
   const element = document.getElementById(section);
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' });
   }
-};
-
-// Computed styles for parallax effect
-const getParallaxStyle = (element: ParallaxElement): Record<string, string> => {
-  const xOffset = (mousePosition.x / window.innerWidth - 0.5) * element.depth * 100;
-  const yOffset = (mousePosition.y / window.innerHeight - 0.5) * element.depth * 100;
-  
-  return {
-    transform: `translate(${xOffset}px, ${yOffset}px) rotate(${element.rotation}deg)`,
-    width: `${element.size}px`,
-    height: `${element.size}px`,
-    backgroundColor: element.color,
-    opacity: element.opacity.toString(),
-    position: 'absolute',
-    borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
-    top: `${element.y}%`,
-    left: `${element.x}%`,
-    transition: 'transform 0.2s ease-out'
-  };
-};
-
-  // Mouse movement handler
-const handleMouseMove = (event: MouseEvent): void => {
-  mousePosition.x = event.clientX;
-  mousePosition.y = event.clientY;
 };
 
 // Scroll handler for animations
@@ -109,13 +61,11 @@ onMounted(() => {
   }, 500);
   
   // Add event listeners
-  window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('scroll', handleScroll);
 });
 
 // Cleanup on unmount
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove);
   window.removeEventListener('scroll', handleScroll);
 });
 </script>
@@ -131,12 +81,8 @@ onUnmounted(() => {
   </div>
 
   <!-- Main content -->
-  <div class="min-h-screen overflow-hidden relative" @mousemove="handleMouseMove">
+  <div class="min-h-screen overflow-hidden relative">
     <!-- Floating shapes for background effect -->
-    <div v-for="element in parallaxElements" :key="element.id" 
-         :style="getParallaxStyle(element)"
-         class="hidden md:block"></div>
-    
     <!-- Navbar Component -->
     <Navbar :scrollY="scrollY" @navigate="handleNavigation" />
 

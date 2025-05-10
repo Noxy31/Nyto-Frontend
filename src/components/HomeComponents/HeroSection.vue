@@ -12,7 +12,7 @@ const props = defineProps<HeroSectionProps>();
 const animationActive = ref<boolean>(false);
 const textVisible = ref<boolean>(false);
 
-// Japanese symbols for fluid animation
+// Japanese symbols for background - STATIC, no animation
 interface Symbol {
   id: number;
   char: string;
@@ -20,17 +20,15 @@ interface Symbol {
   x: number;
   y: number;
   rotation: number;
-  delay: number;
   color: string;
-  visible: boolean;
 }
 
-// Generate random symbols for background effect
+// Generate static symbols for background effect
 const generateSymbols = (): Symbol[] => {
   const symbols = [];
   const characters = ['日', '本', '語', '学', '習', '漢', '字', '話', '読', '見', '聞', '書', '言'];
   
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 20; i++) {
     symbols.push({
       id: i,
       char: characters[Math.floor(Math.random() * characters.length)],
@@ -38,11 +36,9 @@ const generateSymbols = (): Symbol[] => {
       x: Math.random() * 100,
       y: Math.random() * 100,
       rotation: Math.random() * 40 - 20,
-      delay: Math.random() * 0.8,
       color: [
-        '#4B3B47', '#6A6262', '#9C9990', '#CFD2B2', '#E0D8DE'
-      ][Math.floor(Math.random() * 5)],
-      visible: false
+        '#DEC0F1', '#50C5B7', '#496DDB', '#EFD9CE', '#50C5B7'
+      ][Math.floor(Math.random() * 5)]
     });
   }
   
@@ -53,26 +49,19 @@ const symbols = reactive<Symbol[]>(generateSymbols());
 
 // Central display characters with meaning
 const centerKanjis = reactive([
-  { char: '学', meaning: 'study', active: false, color: '#4B3B47', delay: 0.2 },
-  { char: '漢', meaning: 'kanji', active: false, color: '#6A6262', delay: 0.5 },
-  { char: '上', meaning: 'advance', active: false, color: '#9C9990', delay: 0.8 }
+  { char: '学', meaning: 'study', active: false, color: '#50C5B7', delay: 0.2 },
+  { char: '漢', meaning: 'kanji', active: false, color: '#496DDB', delay: 0.5 },
+  { char: '上', meaning: 'advance', active: false, color: '#DEC0F1', delay: 0.8 }
 ]);
 
 // Initialize animations
 onMounted(() => {
-  // Start background animation
+  // Start animation
   setTimeout(() => {
     animationActive.value = true;
     textVisible.value = true;
     
-    // Animate background symbols
-    symbols.forEach((symbol, index) => {
-      setTimeout(() => {
-        symbol.visible = true;
-      }, index * 120);
-    });
-    
-    // Animate center kanjis
+    // Animate center kanjis only
     centerKanjis.forEach((kanji, index) => {
       setTimeout(() => {
         kanji.active = true;
@@ -83,20 +72,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden hero-background">
-    <!-- Animated background elements -->
+  <section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden hero-background pt-20">
+    <!-- Static background elements - no animation -->
     <div class="absolute inset-0 overflow-hidden">
       <div v-for="symbol in symbols" 
            :key="symbol.id"
-           class="absolute symbol-animation"
-           :class="{ 'symbol-visible': symbol.visible }"
+           class="absolute symbol-static"
            :style="{
              top: `${symbol.y}%`,
              left: `${symbol.x}%`,
              fontSize: `${symbol.size}px`,
              color: symbol.color,
-             transform: `rotate(${symbol.rotation}deg)`,
-             transitionDelay: `${symbol.delay}s`
+             transform: `rotate(${symbol.rotation}deg)`
            }">
         {{ symbol.char }}
       </div>
@@ -127,7 +114,6 @@ onMounted(() => {
               <button class="primary-button shine-effect">
                 Start Learning Now
               </button>
-              
               <button class="secondary-button">
                 Explore Mojidex
                 <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5 play-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -190,50 +176,68 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    
-    <!-- Scroll indicator -->
-    <div class="scroll-indicator">
-      <div class="scroll-arrow"></div>
-      <div class="scroll-text">Explore More</div>
-    </div>
   </section>
 </template>
 
 <style scoped>
-/* Base colors */
+/* Base colors - Nouvelle palette harmonieuse */
 :root {
-  --color-primary: #4B3B47;
-  --color-secondary: #6A6262;
-  --color-accent: #9C9990;
-  --color-light: #CFD2B2;
-  --color-bg: #E0D8DE;
+  --color-cream: #EFD9CE;      /* Crème rosé */
+  --color-lavender: #DEC0F1;   /* Lavande */
+  --color-teal: #50C5B7;       /* Vert d'eau */
+  --color-blue: #496DDB;       /* Bleu vif */
+  --color-dark-green: #14342B; /* Vert foncé */
 }
 
-/* Hero section background */
+/* Hero section background avec eclairage amélioré */
 .hero-background {
-  background-color: var(--color-bg);
-  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-blue) 100%);
   position: relative;
+  overflow: hidden;
+}
+
+.hero-background::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background: 
+    radial-gradient(circle at 75% 25%, rgba(80, 197, 183, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 25% 75%, rgba(73, 109, 219, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(222, 192, 241, 0.1) 0%, transparent 70%);
+  animation: ambientLight 15s infinite alternate ease-in-out;
+  z-index: 0;
+}
+
+@keyframes ambientLight {
+  0% {
+    opacity: 0.7;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05) rotate(1deg);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 .gradient-overlay {
-  background: radial-gradient(circle at center, transparent 0%, rgba(224, 216, 222, 0.9) 70%);
-  z-index: 1;
+  display: none; /* Suppression de l'ancien overlay sombre */
 }
 
-/* Floating symbols animation */
-.symbol-animation {
-  opacity: 0;
-  transform-origin: center;
-  transition: opacity 1.5s ease, transform 5s ease;
+/* Static symbols - no animation */
+.symbol-static {
+  opacity: 0.2;
   font-family: "Noto Sans JP", sans-serif;
   filter: blur(1px);
   user-select: none;
   z-index: 0;
-}
-
-.symbol-visible {
-  opacity: 0.15;
+  text-shadow: 0 0 15px rgba(222, 192, 241, 0.3);
 }
 
 /* Hero text styles */
@@ -241,8 +245,9 @@ onMounted(() => {
   font-size: 3.5rem;
   line-height: 1.1;
   font-weight: 800;
-  color: var(--color-primary);
+  color: var(--color-cream);
   margin-bottom: 1.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 @media (min-width: 768px) {
@@ -252,49 +257,47 @@ onMounted(() => {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  /* Amélioration de la visibilité du texte avec un dégradé plus contrasté */
+  background: linear-gradient(135deg, #50C5B7 20%, #DEC0F1 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: inline-block;
   position: relative;
-}
-
-.gradient-text:after {
-  content: "日本語";
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  font-size: 1.2rem;
-  color: var(--color-light);
-  -webkit-text-fill-color: var(--color-light);
-  opacity: 0.7;
+  text-shadow: none;
+  /* Ajout d'un contour plus prononcé */
+  filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+  /* Renforcement du texte */
+  font-weight: 900;
 }
 
 .hero-subtitle {
   font-size: 1.25rem;
   line-height: 1.6;
-  font-weight: 300;
-  color: var(--color-secondary);
+  font-weight: 400;
+  color: var(--color-cream);
   max-width: 600px;
 }
 
 /* Button styles */
 .primary-button {
   padding: 1rem 2rem;
-  border-radius: 9999px;
+  border-radius: 4px;
   font-weight: 600;
   font-size: 1rem;
-  background-color: var(--color-primary);
-  color: var(--color-light);
+  background: linear-gradient(135deg, var(--color-teal) 0%, #3da89b 100%);
+  color: var(--color-dark-green);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .primary-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(75, 59, 71, 0.3);
+  box-shadow: 0 8px 25px rgba(80, 197, 183, 0.4);
+  filter: brightness(1.05);
 }
 
 .shine-effect:before {
@@ -307,7 +310,7 @@ onMounted(() => {
   background: linear-gradient(
     120deg,
     transparent,
-    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.5),
     transparent
   );
   transform: rotate(25deg);
@@ -319,22 +322,27 @@ onMounted(() => {
   top: 100%;
 }
 
+/* Secondary button - Ajouté pour Explore Mojidex */
 .secondary-button {
   padding: 1rem 2rem;
-  border-radius: 9999px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 1rem;
-  border: 2px solid var(--color-secondary);
-  color: var(--color-secondary);
-  background-color: transparent;
+  border: 2px solid var(--color-lavender);
+  color: var(--color-cream);
+  background-color: rgba(222, 192, 241, 0.2);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
+  box-shadow: 0 4px 15px rgba(73, 109, 219, 0.2);
 }
 
 .secondary-button:hover {
-  background-color: rgba(106, 98, 98, 0.1);
+  background-color: rgba(222, 192, 241, 0.3);
+  border-color: var(--color-teal);
+  color: white;
   transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(73, 109, 219, 0.3);
 }
 
 .play-icon {
@@ -356,27 +364,30 @@ onMounted(() => {
 }
 
 .circle-background {
-  width: 300px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--color-light) 0%, rgba(207, 210, 178, 0.3) 70%);
+  background: radial-gradient(circle, rgba(80, 197, 183, 0.3) 0%, rgba(73, 109, 219, 0.1) 70%);
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  filter: blur(20px);
+  filter: blur(30px);
   z-index: 0;
   animation: pulse 8s infinite ease-in-out;
+  opacity: 0.7;
 }
 
 @keyframes pulse {
   0%, 100% {
     transform: translate(-50%, -50%) scale(1);
     opacity: 0.7;
+    filter: blur(30px);
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translate(-50%, -50%) scale(1.2);
     opacity: 0.9;
+    filter: blur(35px);
   }
 }
 
@@ -393,7 +404,7 @@ onMounted(() => {
   left: 50%;
   width: 120px;
   height: 120px;
-  border-radius: 20px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -401,7 +412,9 @@ onMounted(() => {
   transform: translate(-50%, -50%) scale(0.4) rotate(20deg);
   opacity: 0;
   transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
 }
 
 .kanji-card.active {
@@ -424,8 +437,9 @@ onMounted(() => {
 .kanji-character {
   font-size: 3rem;
   font-weight: bold;
-  color: white;
+  color: #ffffff;
   font-family: "Noto Sans JP", sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .kanji-meaning {
@@ -440,10 +454,12 @@ onMounted(() => {
 .decorative-text {
   position: absolute;
   font-family: "Noto Sans JP", sans-serif;
-  opacity: 0.15;
+  opacity: 0.2;
   font-weight: bold;
-  color: var(--color-primary);
+  color: var(--color-cream);
   animation: float 10s infinite ease-in-out;
+  filter: blur(0.5px);
+  text-shadow: 0 2px 10px rgba(80, 197, 183, 0.5);
 }
 
 .text-1 {
@@ -451,6 +467,7 @@ onMounted(() => {
   top: 20%;
   right: 10%;
   animation-delay: 0.5s;
+  color: rgba(222, 192, 241, 0.8);
 }
 
 .text-2 {
@@ -458,6 +475,7 @@ onMounted(() => {
   bottom: 25%;
   left: 15%;
   animation-delay: 1s;
+  color: rgba(80, 197, 183, 0.8);
 }
 
 .text-3 {
@@ -465,14 +483,18 @@ onMounted(() => {
   top: 60%;
   right: 15%;
   animation-delay: 1.5s;
+  color: rgba(73, 109, 219, 0.8);
 }
 
+/* Animations supplémentaires */
 @keyframes float {
   0%, 100% {
     transform: translateY(0) rotate(0);
+    filter: blur(0.5px);
   }
   50% {
     transform: translateY(-20px) rotate(3deg);
+    filter: blur(1px);
   }
 }
 
@@ -491,32 +513,91 @@ onMounted(() => {
   margin: 0 auto;
 }
 
+/* Feature items - Fixed hover problem */
 .feature-item {
   flex: 1;
   min-width: 120px;
-  padding: 1rem;
-  background-color: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
+  padding: 1.2rem;
+  background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.8));
   border-radius: 12px;
   text-align: center;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(207, 210, 178, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  border: 2px solid rgba(80, 197, 183, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+  /* Réserve de l'espace pour éviter le déplacement */
+  margin-bottom: 5px;
+}
+
+.feature-item:nth-child(1) {
+  background: linear-gradient(to bottom right, var(--color-cream), rgba(73, 109, 219, 0.2));
+  border-color: rgba(73, 109, 219, 0.6);
+}
+
+.feature-item:nth-child(2) {
+  background: linear-gradient(to bottom right, var(--color-cream), rgba(80, 197, 183, 0.2));
+  border-color: rgba(80, 197, 183, 0.6);
+}
+
+.feature-item:nth-child(3) {
+  background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.2));
+  border-color: rgba(222, 192, 241, 0.6);
+}
+
+.feature-item:nth-child(4) {
+  background: linear-gradient(to bottom right, var(--color-cream), rgba(239, 217, 206, 0.2));
+  border-color: rgba(239, 217, 206, 0.6);
 }
 
 .feature-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  /* Hover plus lumineux */
+}
+
+.feature-item:hover:nth-child(1) {
+  background: linear-gradient(to bottom right, rgba(73, 109, 219, 0.2), rgba(73, 109, 219, 0.3));
+}
+
+.feature-item:hover:nth-child(2) {
+  background: linear-gradient(to bottom right, rgba(80, 197, 183, 0.2), rgba(80, 197, 183, 0.3));
+}
+
+.feature-item:hover:nth-child(3) {
+  background: linear-gradient(to bottom right, rgba(222, 192, 241, 0.2), rgba(222, 192, 241, 0.3));
+}
+
+.feature-item:hover:nth-child(4) {
+  background: linear-gradient(to bottom right, rgba(239, 217, 206, 0.2), rgba(239, 217, 206, 0.3));
+}
+
+.feature-item:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-teal), var(--color-blue));
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-item:hover:before {
+  opacity: 1;
 }
 
 .feature-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+  margin-bottom: 0.7rem;
 }
 
 .feature-title {
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-dark-green);
+  letter-spacing: 0.3px;
 }
 
 /* Animation utilities */
@@ -529,54 +610,5 @@ onMounted(() => {
 .element-visible {
   opacity: 1;
   transform: translateY(0);
-}
-
-/* Scroll indicator */
-.scroll-indicator {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 0.7;
-  transition: opacity 0.3s;
-  z-index: 10;
-}
-
-.scroll-indicator:hover {
-  opacity: 1;
-}
-
-.scroll-arrow {
-  width: 30px;
-  height: 30px;
-  margin-bottom: 0.5rem;
-  border-left: 2px solid var(--color-primary);
-  border-bottom: 2px solid var(--color-primary);
-  transform: rotate(-45deg);
-  animation: scrollIndicator 2s infinite;
-}
-
-.scroll-text {
-  font-size: 0.75rem;
-  color: var(--color-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-@keyframes scrollIndicator {
-  0% {
-    opacity: 0;
-    transform: rotate(-45deg) translate(10px, 10px);
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: rotate(-45deg) translate(0, 0);
-  }
 }
 </style>
