@@ -71,18 +71,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- Loading overlay -->
+  <!-- Loading overlay avec dégradé clair -->
   <div class="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-1000" 
        :class="pageLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'"
-       style="background-color: #4B3B47;">
-    <div class="text-6xl font-bold" style="color: #CFD2B2;">
-      Nyto<span style="color: #9C9990;">.ai</span>
+       style="background: linear-gradient(135deg, #EFD9CE 0%, #DEC0F1 50%, #F5F0E6 100%);">
+    <div class="text-6xl font-bold">
+      <span style="color: #14342B;">Nyto</span><span style="color: #50C5B7;">.ai</span>
     </div>
   </div>
 
   <!-- Main content -->
   <div class="min-h-screen overflow-hidden relative">
-    <!-- Floating shapes for background effect -->
     <!-- Navbar Component -->
     <Navbar :scrollY="scrollY" @navigate="handleNavigation" />
 
@@ -105,29 +104,19 @@ onUnmounted(() => {
     <FooterSection />
     
     <!-- Back to top button -->
-    <button class="fixed bottom-8 right-8 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transform transition-all hover:scale-110 z-30 hoverable"
+    <button class="fixed bottom-8 right-8 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transform transition-all hover:scale-110 z-30"
             :class="scrollY > 300 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-            style="background-color: #4B3B47; color: #CFD2B2;"
+            style="background-color: #50C5B7; color: #14342B;"
             @click="scrollToTop">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
       </svg>
     </button>
-    
-    <!-- Custom cursor effect removed -->
   </div>
 </template>
 
 <style>
 /* Global styles */
-:root {
-  --color-primary: #4B3B47;
-  --color-secondary: #6A6262;
-  --color-accent: #9C9990;
-  --color-light: #CFD2B2;
-  --color-bg: #E0D8DE;
-}
-
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
     'Helvetica Neue', Arial, sans-serif;
@@ -152,17 +141,6 @@ body {
 
 .animate-float {
   animation: float 10s ease-in-out infinite;
-}
-
-/* Back to top button styling */
-button {
-  transition: all 0.3s ease;
-}
-
-/* Custom cursor effect */
-.custom-cursor {
-  pointer-events: none;
-  mix-blend-mode: difference;
 }
 
 /* Aspect ratios utility classes - shared across components */
@@ -196,7 +174,7 @@ button {
   left: 0;
 }
 
-/* Optional: Add some global transitions for smoother page experience */
+/* Page transitions for smoother experience */
 .page-transition-enter-active,
 .page-transition-leave-active {
   transition: opacity 0.5s ease;
@@ -207,7 +185,7 @@ button {
   opacity: 0;
 }
 
-/* Optional: Some responsive adjustments */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   h1 {
     font-size: 2.5rem;

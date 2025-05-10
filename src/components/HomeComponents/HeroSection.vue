@@ -23,12 +23,13 @@ interface Symbol {
   color: string;
 }
 
-// Generate static symbols for background effect
+// Generate static symbols for background effect - Reduced count
 const generateSymbols = (): Symbol[] => {
   const symbols = [];
   const characters = ['日', '本', '語', '学', '習', '漢', '字', '話', '読', '見', '聞', '書', '言'];
   
-  for (let i = 0; i < 20; i++) {
+  // Reduced from 20 to 10 for better performance
+  for (let i = 0; i < 10; i++) {
     symbols.push({
       id: i,
       char: characters[Math.floor(Math.random() * characters.length)],
@@ -56,8 +57,8 @@ const centerKanjis = reactive([
 
 // Initialize animations
 onMounted(() => {
-  // Start animation
-  setTimeout(() => {
+  // Use requestAnimationFrame for better performance
+  requestAnimationFrame(() => {
     animationActive.value = true;
     textVisible.value = true;
     
@@ -67,7 +68,7 @@ onMounted(() => {
         kanji.active = true;
       }, 1000 + index * 800);
     });
-  }, 400);
+  });
 });
 </script>
 
@@ -83,14 +84,13 @@ onMounted(() => {
              left: `${symbol.x}%`,
              fontSize: `${symbol.size}px`,
              color: symbol.color,
-             transform: `rotate(${symbol.rotation}deg)`
+             transform: `rotate(${symbol.rotation}deg)`,
+             // Ajout de will-change pour optimiser le rendu
+             willChange: 'transform'
            }">
         {{ symbol.char }}
       </div>
     </div>
-
-    <!-- Gradient overlay -->
-    <div class="absolute inset-0 gradient-overlay"></div>
     
     <!-- Main content -->
     <div class="container relative z-10 px-6 md:px-12 mx-auto flex flex-col items-center">
@@ -127,8 +127,8 @@ onMounted(() => {
         <!-- Right side - Visual elements -->
         <div class="lg:w-1/2 mt-12 lg:mt-0 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.2s;">
           <div class="relative display-container">
-            <!-- Animated circle background -->
-            <div class="circle-background"></div>
+            <!-- Static circle background - no pulse animation -->
+            <div class="circle-background-static"></div>
             
             <!-- Main kanji display -->
             <div class="kanji-display">
@@ -146,10 +146,10 @@ onMounted(() => {
               </div>
             </div>
             
-            <!-- Japanese text floating elements -->
-            <div class="decorative-text text-1">文法</div>
-            <div class="decorative-text text-2">単語</div>
-            <div class="decorative-text text-3">会話</div>
+            <!-- Static Japanese text elements -->
+            <div class="decorative-text text-1" style="transform: translateY(-10px) rotate(2deg);">文法</div>
+            <div class="decorative-text text-2" style="transform: translateY(5px) rotate(-1deg);">単語</div>
+            <div class="decorative-text text-3" style="transform: translateY(-5px) rotate(1deg);">会話</div>
           </div>
         </div>
       </div>
@@ -158,20 +158,24 @@ onMounted(() => {
       <div class="features-preview slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.4s;">
         <div class="features-grid">
           <div class="feature-item">
-            <div class="feature-icon">📚</div>
-            <div class="feature-title">Advanced Courses</div>
+            <div class="feature-icon">🎓</div>
+            <div class="feature-title">All Levels</div>
+            <div class="feature-desc">From beginner to pro</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">✏️</div>
-            <div class="feature-title">Personalized</div>
+            <div class="feature-icon">🎯</div>
+            <div class="feature-title">Gamified Learning</div>
+            <div class="feature-desc">Fun interactive games</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">🎮</div>
+            <div class="feature-icon">📖</div>
             <div class="feature-title">Mojidex</div>
+            <div class="feature-desc">Your kanji companion</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">📈</div>
-            <div class="feature-title">Progress Tracking</div>
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Track Progress</div>
+            <div class="feature-desc">Real-time analytics</div>
           </div>
         </div>
       </div>
@@ -189,13 +193,14 @@ onMounted(() => {
   --color-dark-green: #14342B; /* Vert foncé */
 }
 
-/* Hero section background avec eclairage amélioré */
+/* Hero section background avec eclairage statique */
 .hero-background {
   background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-blue) 100%);
   position: relative;
   overflow: hidden;
 }
 
+/* Removed ambientLight animation for performance */
 .hero-background::before {
   content: '';
   position: absolute;
@@ -207,37 +212,18 @@ onMounted(() => {
     radial-gradient(circle at 75% 25%, rgba(80, 197, 183, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 25% 75%, rgba(73, 109, 219, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 50% 50%, rgba(222, 192, 241, 0.1) 0%, transparent 70%);
-  animation: ambientLight 15s infinite alternate ease-in-out;
+  opacity: 0.8;
   z-index: 0;
 }
 
-@keyframes ambientLight {
-  0% {
-    opacity: 0.7;
-    transform: scale(1) rotate(0deg);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.05) rotate(1deg);
-  }
-  100% {
-    opacity: 0.7;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.gradient-overlay {
-  display: none; /* Suppression de l'ancien overlay sombre */
-}
-
-/* Static symbols - no animation */
+/* Static symbols - no animation, reduced blur */
 .symbol-static {
-  opacity: 0.2;
+  opacity: 0.15;
   font-family: "Noto Sans JP", sans-serif;
-  filter: blur(1px);
+  filter: blur(0.5px);
   user-select: none;
   z-index: 0;
-  text-shadow: 0 0 15px rgba(222, 192, 241, 0.3);
+  text-shadow: 0 0 10px rgba(222, 192, 241, 0.2);
 }
 
 /* Hero text styles */
@@ -257,7 +243,6 @@ onMounted(() => {
 }
 
 .gradient-text {
-  /* Amélioration de la visibilité du texte avec un dégradé plus contrasté */
   background: linear-gradient(135deg, #50C5B7 20%, #DEC0F1 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -265,9 +250,7 @@ onMounted(() => {
   display: inline-block;
   position: relative;
   text-shadow: none;
-  /* Ajout d'un contour plus prononcé */
   filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
-  /* Renforcement du texte */
   font-weight: 900;
 }
 
@@ -300,7 +283,8 @@ onMounted(() => {
   filter: brightness(1.05);
 }
 
-.shine-effect:before {
+/* Simplified shine effect - only on hover */
+.shine-effect:hover:before {
   content: '';
   position: absolute;
   top: -100%;
@@ -314,15 +298,17 @@ onMounted(() => {
     transparent
   );
   transform: rotate(25deg);
-  transition: all 0.8s;
+  animation: shine 0.8s;
 }
 
-.shine-effect:hover:before {
-  left: 200%;
-  top: 100%;
+@keyframes shine {
+  to {
+    left: 200%;
+    top: 100%;
+  }
 }
 
-/* Secondary button - Ajouté pour Explore Mojidex */
+/* Secondary button */
 .secondary-button {
   padding: 1rem 2rem;
   border-radius: 4px;
@@ -363,7 +349,8 @@ onMounted(() => {
   align-items: center;
 }
 
-.circle-background {
+/* Static circle background - no pulse animation */
+.circle-background-static {
   width: 400px;
   height: 400px;
   border-radius: 50%;
@@ -374,21 +361,7 @@ onMounted(() => {
   transform: translate(-50%, -50%);
   filter: blur(30px);
   z-index: 0;
-  animation: pulse 8s infinite ease-in-out;
-  opacity: 0.7;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.7;
-    filter: blur(30px);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 0.9;
-    filter: blur(35px);
-  }
+  opacity: 0.8;
 }
 
 .kanji-display {
@@ -398,6 +371,7 @@ onMounted(() => {
   z-index: 2;
 }
 
+/* Optimized kanji card transitions */
 .kanji-card {
   position: absolute;
   top: 50%;
@@ -411,15 +385,17 @@ onMounted(() => {
   align-items: center;
   transform: translate(-50%, -50%) scale(0.4) rotate(20deg);
   opacity: 0;
-  transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
+  will-change: transform, opacity;
 }
 
 .kanji-card.active {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1) rotate(0);
+  will-change: auto;
 }
 
 .kanji-card:nth-child(1).active {
@@ -450,14 +426,13 @@ onMounted(() => {
   letter-spacing: 0.05em;
 }
 
-/* Decorative floating text */
+/* Static decorative text */
 .decorative-text {
   position: absolute;
   font-family: "Noto Sans JP", sans-serif;
   opacity: 0.2;
   font-weight: bold;
   color: var(--color-cream);
-  animation: float 10s infinite ease-in-out;
   filter: blur(0.5px);
   text-shadow: 0 2px 10px rgba(80, 197, 183, 0.5);
 }
@@ -466,7 +441,6 @@ onMounted(() => {
   font-size: 1.8rem;
   top: 20%;
   right: 10%;
-  animation-delay: 0.5s;
   color: rgba(222, 192, 241, 0.8);
 }
 
@@ -474,7 +448,6 @@ onMounted(() => {
   font-size: 1.5rem;
   bottom: 25%;
   left: 15%;
-  animation-delay: 1s;
   color: rgba(80, 197, 183, 0.8);
 }
 
@@ -482,52 +455,56 @@ onMounted(() => {
   font-size: 2rem;
   top: 60%;
   right: 15%;
-  animation-delay: 1.5s;
   color: rgba(73, 109, 219, 0.8);
-}
-
-/* Animations supplémentaires */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(0);
-    filter: blur(0.5px);
-  }
-  50% {
-    transform: translateY(-20px) rotate(3deg);
-    filter: blur(1px);
-  }
 }
 
 /* Features preview */
 .features-preview {
-  margin-top: 4rem;
+  margin-top: 2.5rem;
   width: 100%;
+  margin-bottom: 2rem;
 }
 
 .features-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.5rem;
-  max-width: 800px;
+  gap: 1.2rem;
+  max-width: 900px;
   margin: 0 auto;
 }
 
-/* Feature items - Fixed hover problem */
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .features-grid {
+    gap: 1rem;
+  }
+  
+  .feature-item {
+    min-width: calc(50% - 0.5rem);
+  }
+}
+
+@media (max-width: 400px) {
+  .feature-item {
+    min-width: 100%;
+  }
+}
+
+/* Optimized feature items */
 .feature-item {
   flex: 1;
-  min-width: 120px;
-  padding: 1.2rem;
+  min-width: 180px;
+  padding: 1.5rem 1.2rem;
   background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.8));
   border-radius: 12px;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 2px solid rgba(80, 197, 183, 0.4);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
   position: relative;
-  /* Réserve de l'espace pour éviter le déplacement */
   margin-bottom: 5px;
+  will-change: transform;
 }
 
 .feature-item:nth-child(1) {
@@ -553,23 +530,7 @@ onMounted(() => {
 .feature-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  /* Hover plus lumineux */
-}
-
-.feature-item:hover:nth-child(1) {
-  background: linear-gradient(to bottom right, rgba(73, 109, 219, 0.2), rgba(73, 109, 219, 0.3));
-}
-
-.feature-item:hover:nth-child(2) {
-  background: linear-gradient(to bottom right, rgba(80, 197, 183, 0.2), rgba(80, 197, 183, 0.3));
-}
-
-.feature-item:hover:nth-child(3) {
-  background: linear-gradient(to bottom right, rgba(222, 192, 241, 0.2), rgba(222, 192, 241, 0.3));
-}
-
-.feature-item:hover:nth-child(4) {
-  background: linear-gradient(to bottom right, rgba(239, 217, 206, 0.2), rgba(239, 217, 206, 0.3));
+  will-change: auto;
 }
 
 .feature-item:before {
@@ -582,7 +543,7 @@ onMounted(() => {
   background: linear-gradient(90deg, var(--color-teal), var(--color-blue));
   z-index: 1;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
 .feature-item:hover:before {
@@ -590,25 +551,36 @@ onMounted(() => {
 }
 
 .feature-icon {
-  font-size: 1.8rem;
-  margin-bottom: 0.7rem;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
 }
 
 .feature-title {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-dark-green);
   letter-spacing: 0.3px;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
 }
 
-/* Animation utilities */
+.feature-desc {
+  font-size: 0.85rem;
+  color: rgba(20, 52, 43, 0.8);
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+/* Animation utilities - optimized */
 .slide-up-fade {
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity 1s ease, transform 1s ease;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  will-change: transform, opacity;
 }
 
 .element-visible {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto;
 }
 </style>

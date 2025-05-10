@@ -16,54 +16,78 @@ interface Feature {
   active: boolean;
 }
 
-// Features data
+// Features data avec nouvelles descriptions
 const features = ref<Feature[]>([
   { 
-    title: "Immersive Learning",
-    description: "Experience Japanese through interactive scenarios and real-world conversations.",
-    icon: "✨",
+    title: "All Levels Courses",
+    description: "Start from the basics with hiragana/katakana learning, progress through fundamental kanji, and advance through structured levels from N5 to N1 proficiency.",
+    icon: "🎓",
     active: true
   },
   { 
-    title: "AI-Powered Feedback",
-    description: "Get instant pronunciation and grammar feedback tailored to your unique learning style.",
-    icon: "🔄",
+    title: "Interactive Exercises",
+    description: "Apply what you've learned through original games and activities that make Japanese learning fun and engaging.",
+    icon: "🎯",
     active: false
   },
   { 
-    title: "Adaptive Curriculum",
-    description: "Our system evolves with you, focusing on what you need to learn most right now.",
-    icon: "📈",
+    title: "Mojidex Collection",
+    description: "Store all learned characters and words in your personal dictionary with usage examples and comprehensive information, all associated to a unique Yokai illustration.",
+    icon: "📖",
     active: false
   },
   { 
-    title: "Cultural Context",
-    description: "Learn the language alongside cultural nuances for authentic communication skills.",
-    icon: "🏮",
+    title: "Progress Tracking",
+    description: "Track your progression with rewards system, adaptive difficulty exercises, and smart features designed for real-world Japanese usage.",
+    icon: "📊",
     active: false
   }
 ]);
 
-// Activate feature by index or hovering
+// Carousel images placeholder
+const carouselImages = ref<string[]>([
+  '/images/learning-1.jpg',
+  '/images/learning-2.jpg',
+  '/images/learning-3.jpg',
+  '/images/learning-4.jpg'
+]);
+
+const currentImageIndex = ref(0);
+
+// Pause/Resume rotation on hover
+const isPaused = ref(false);
+
+// Activate feature by index
 const activateFeature = (index: number): void => {
   features.value.forEach((f, i) => {
     f.active = i === index;
   });
+  currentImageIndex.value = index;
+};
+
+// Pause rotation
+const pauseRotation = () => {
+  isPaused.value = true;
+};
+
+// Resume rotation
+const resumeRotation = () => {
+  isPaused.value = false;
 };
 
 // Rotate through features automatically
 let featureInterval: number | undefined;
 
 onMounted(() => {
-  // Start feature rotation with interval
   featureInterval = window.setInterval(() => {
-    const activeIndex = features.value.findIndex(f => f.active);
-    const nextIndex = (activeIndex + 1) % features.value.length;
-    activateFeature(nextIndex);
-  }, 4000);
+    if (!isPaused.value) {
+      const activeIndex = features.value.findIndex(f => f.active);
+      const nextIndex = (activeIndex + 1) % features.value.length;
+      activateFeature(nextIndex);
+    }
+  }, 5000);
 });
 
-// Clean up interval when component is unmounted
 onUnmounted(() => {
   if (featureInterval) {
     clearInterval(featureInterval);
@@ -72,26 +96,31 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section id="features" class="py-24 relative features-bg">
-    <div class="container mx-auto px-6 md:px-12">
-      <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 transition-all duration-1000 transform text-light"
-          :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'">
-        The Nyto Experience
+  <section id="features" class="relative features-bg overflow-hidden">
+    
+    <div class="container mx-auto px-6 md:px-12 py-24 relative z-10">
+      <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 transition-all duration-1000 transform"
+          :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
+          style="line-height: 1.3;">
+        The <span class="gradient-text-nyto">Nyto</span> Experience
       </h2>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <!-- Feature list with active highlight -->
+        <!-- Feature list -->
         <div class="space-y-6">
           <div v-for="(feature, index) in features" 
                :key="index"
-               @mouseenter="activateFeature(index)"
-               class="p-6 rounded-2xl transition-all duration-500 cursor-pointer transform feature-card"
+               @mouseenter="() => { activateFeature(index); pauseRotation(); }"
+               @mouseleave="resumeRotation"
+               class="p-6 rounded-2xl transition-all duration-500 cursor-pointer feature-card"
                :class="feature.active ? 'active' : 'inactive'">
             <div class="flex items-start space-x-4">
-              <div class="text-3xl feature-icon">{{ feature.icon }}</div>
-              <div>
+              <div class="text-3xl feature-icon flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                {{ feature.icon }}
+              </div>
+              <div class="flex-1">
                 <h3 class="text-xl font-bold mb-2 feature-title">{{ feature.title }}</h3>
-                <p class="feature-description">
+                <p class="feature-description text-sm leading-relaxed">
                   {{ feature.description }}
                 </p>
               </div>
@@ -99,33 +128,36 @@ onUnmounted(() => {
           </div>
         </div>
         
-        <!-- Interactive display -->
-        <div class="rounded-3xl overflow-hidden shadow-2xl transform transition-all duration-1000 feature-display"
+        <!-- Carousel display -->
+        <div class="rounded-3xl overflow-hidden shadow-2xl transform transition-all duration-1000 carousel-container"
              :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'">
-          <div class="aspect-w-16 aspect-h-9 rounded-t-3xl overflow-hidden feature-display-content">
-            <!-- Feature showcase -->
-            <div class="w-full h-full flex items-center justify-center p-4">
-              <div class="text-center">
-                <div v-for="feature in features" 
-                     v-show="feature.active"
-                     class="transition-all duration-500 feature-display-item">
-                  <div class="text-6xl mb-4">{{ feature.icon }}</div>
-                  <h4 class="text-2xl font-bold mb-2">{{ feature.title }}</h4>
-                  <p class="text-lg feature-display-description">{{ feature.description }}</p>
+          <div class="aspect-w-16 aspect-h-9 carousel-display">
+            <!-- Image placeholder -->
+            <div class="w-full h-full flex items-center justify-center">
+              <transition name="fade" mode="out-in">
+                <div :key="currentImageIndex" class="text-center p-8">
+                  <div class="text-6xl mb-4 drop-shadow-lg">{{ features[currentImageIndex].icon }}</div>
+                  <p class="text-lg font-medium text-cream drop-shadow">
+                    Learning Interface Preview
+                  </p>
+                  <p class="text-sm text-cream/80 mt-2">
+                    Images coming soon
+                  </p>
                 </div>
-              </div>
+              </transition>
             </div>
           </div>
           
-          <div class="py-5 px-6 feature-display-footer">
-            <div class="flex justify-between items-center">
-              <div class="font-medium feature-display-label">Explore Features</div>
+          <div class="py-4 px-6 carousel-footer">
+            <div class="flex justify-center items-center">
               <div class="flex space-x-2">
-                <div v-for="(feature, index) in features" 
-                     :key="index"
-                     class="w-3 h-3 rounded-full transition-all duration-300 feature-indicator"
-                     :class="feature.active ? 'active' : ''">
-                </div>
+                <button v-for="(feature, index) in features" 
+                        :key="index"
+                        @click="activateFeature(index)"
+                        class="w-3 h-3 rounded-full transition-all duration-300 feature-indicator"
+                        :class="feature.active ? 'active' : ''"
+                        :aria-label="`Go to feature ${index + 1}`">
+                </button>
               </div>
             </div>
           </div>
@@ -136,91 +168,203 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Color variables */
+/* Color variables - New palette */
 :root {
-  --color-primary: #4B3B47;
-  --color-secondary: #6A6262;
-  --color-accent: #9C9990;
-  --color-light: #CFD2B2;
-  --color-bg: #E0D8DE;
+  --color-cream: #EFD9CE;
+  --color-lavender: #DEC0F1;
+  --color-teal: #50C5B7;
+  --color-blue: #496DDB;
+  --color-dark-green: #14342B;
 }
 
+/* Background with smooth gradient transition from hero */
 .features-bg {
-  background-color: var(--color-primary);
+  background: linear-gradient(180deg, 
+    #496DDB 0%,          /* Bleu de la hero */
+    #3856B3 10%,         /* Transition douce */
+    #2B4595 30%,         /* Plus foncé progressivement */
+    #1E3470 60%,         /* Bleu foncé */
+    #14342B 100%         /* Vert foncé en bas */
+  );
+  position: relative;
+  min-height: 100vh;
 }
 
-.text-light {
-  color: var(--color-light);
+.gradient-transition {
+  display: none; /* Plus besoin avec le nouveau gradient */
 }
 
-/* Feature card styling */
+/* Feature card styling avec bordures colorées */
 .feature-card {
-  transition: all 0.4s ease;
+  backdrop-filter: blur(10px);
+  border: 3px solid;
+  position: relative;
+  overflow: hidden;
 }
 
 .feature-card.active {
-  background-color: var(--color-light);
-  color: var(--color-primary);
-  transform: scale(1.05);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, rgba(239, 217, 206, 0.95) 0%, rgba(222, 192, 241, 0.95) 100%);
+  box-shadow: 0 15px 35px rgba(80, 197, 183, 0.3);
+  border-color: var(--color-teal);
 }
 
 .feature-card.inactive {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--color-light);
-  opacity: 0.8;
+  background: rgba(239, 217, 206, 0.2);
+  opacity: 0.85;
+  border-color: rgba(222, 192, 241, 0.4);
+}
+
+.feature-card:hover {
+  box-shadow: 0 0 30px rgba(222, 192, 241, 0.5); /* Glow rose/crème seulement */
+  border-color: var(--color-lavender);
+  transform: translateX(5px);
+}
+
+/* Glow effect on hover - rose/crème only */
+.feature-card:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(222, 192, 241, 0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Effet visuel coloré */
+.feature-card.active::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background: linear-gradient(90deg, var(--color-teal), var(--color-blue), var(--color-lavender));
+  border-radius: calc(1rem + 6px);
+  z-index: -1;
+  opacity: 0.6;
+  animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+
+/* Fixed gradient text for Nyto - exactly like hero section */
+.gradient-text-nyto {
+  background: linear-gradient(135deg, #50C5B7 20%, #DEC0F1 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  position: relative;
+  text-shadow: none;
+  filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+  font-weight: 900;
+  padding-bottom: 0.1em; /* Évite que le bas du y soit coupé */
+  margin: 0 2px; /* Petit espace sur les côtés */
+}
+
+h2 {
+  color: var(--color-cream);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 .feature-title {
   transition: color 0.3s ease;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+}
+
+/* Title colors based on card state */
+.feature-card.active .feature-title {
+  color: var(--color-dark-green);
+}
+
+.feature-card.inactive .feature-title {
+  color: #EFD9CE; /* Crème rosé de la palette */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .feature-description {
-  transition: color 0.3s ease;
-}
-
-.feature-card.active .feature-description {
-  color: var(--color-secondary);
-}
-
-.feature-card.inactive .feature-description {
-  color: var(--color-accent);
-}
-
-/* Feature display styling */
-.feature-display {
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-}
-
-.feature-display-content {
-  background-color: var(--color-secondary);
-}
-
-.feature-display-item {
-  color: var(--color-bg);
-}
-
-.feature-display-description {
-  color: var(--color-light);
-}
-
-.feature-display-footer {
-  background-color: var(--color-light);
-}
-
-.feature-display-label {
-  color: var(--color-primary);
-}
-
-.feature-indicator {
-  background-color: var(--color-accent);
-  transform: scale(1);
   transition: all 0.3s ease;
 }
 
+.feature-card.active .feature-description {
+  color: rgba(20, 52, 43, 0.9);
+}
+
+.feature-card.inactive .feature-description {
+  color: #EFD9CE; /* Même couleur crème rosé pour la description */
+  opacity: 0.8;
+}
+
+/* Carousel styling avec bordures et effets colorés */
+.carousel-container {
+  background: linear-gradient(135deg, rgba(73, 109, 219, 0.95) 0%, rgba(80, 197, 183, 0.95) 100%);
+  box-shadow: 0 20px 40px rgba(80, 197, 183, 0.3);
+  border: 3px solid var(--color-lavender);
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, transparent 40%, rgba(239, 217, 206, 0.2) 50%, transparent 60%);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.carousel-display {
+  background: linear-gradient(to br, rgba(20, 52, 43, 0.9), rgba(20, 52, 43, 0.95));
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.carousel-footer {
+  background: linear-gradient(90deg, rgba(20, 52, 43, 0.98) 0%, rgba(73, 109, 219, 0.98) 100%);
+  border-top: 2px solid var(--color-teal);
+  padding: 1rem 1.5rem;
+}
+
+.carousel-footer .font-medium {
+  color: var(--color-cream);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.feature-indicator {
+  background-color: rgba(239, 217, 206, 0.4);
+  border: 1px solid rgba(80, 197, 183, 0.5);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
 .feature-indicator.active {
-  background-color: var(--color-primary);
+  background-color: var(--color-teal);
+  transform: scale(1.3);
+  box-shadow: 0 0 10px var(--color-teal);
+}
+
+.feature-indicator:hover:not(.active) {
+  background-color: var(--color-lavender);
   transform: scale(1.2);
+  border-color: var(--color-lavender);
+}
+
+/* Transitions */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 
 /* Aspect ratios */
@@ -237,5 +381,16 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .feature-card {
+    padding: 1.25rem;
+  }
+  
+  .feature-description {
+    font-size: 0.9rem;
+  }
 }
 </style>
