@@ -1,4 +1,13 @@
-<script setup lang="ts">
+/* Isolation container to prevent global CSS interference */
+.features-container {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.feature-list {
+  position: relative;
+  z-index: 1;
+}<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 
 // Props
@@ -97,7 +106,6 @@ onUnmounted(() => {
 
 <template>
   <section id="features" class="relative features-bg overflow-hidden">
-    
     <div class="container mx-auto px-6 md:px-12 py-24 relative z-10">
       <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 transition-all duration-1000 transform"
           :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
@@ -105,16 +113,16 @@ onUnmounted(() => {
         The <span class="gradient-text-nyto">Nyto</span> Experience
       </h2>
       
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center features-container">
         <!-- Feature list -->
-        <div class="space-y-6">
+        <div class="space-y-6 feature-list">
           <div v-for="(feature, index) in features" 
                :key="index"
                @mouseenter="() => { activateFeature(index); pauseRotation(); }"
                @mouseleave="resumeRotation"
-               class="p-6 rounded-2xl transition-all duration-500 cursor-pointer feature-card"
+               class="p-6 rounded-2xl cursor-pointer feature-card"
                :class="feature.active ? 'active' : 'inactive'">
-            <div class="flex items-start space-x-4">
+            <div class="flex items-start space-x-4 relative z-10">
               <div class="text-3xl feature-icon flex-shrink-0 w-12 h-12 flex items-center justify-center">
                 {{ feature.icon }}
               </div>
@@ -180,73 +188,46 @@ onUnmounted(() => {
 /* Background with smooth gradient transition from hero */
 .features-bg {
   background: linear-gradient(180deg, 
-    #496DDB 0%,          /* Bleu de la hero */
-    #3856B3 10%,         /* Transition douce */
-    #2B4595 30%,         /* Plus foncé progressivement */
-    #1E3470 60%,         /* Bleu foncé */
-    #14342B 100%         /* Vert foncé en bas */
+    #496DDB 0%,
+    #3856B3 10%,
+    #2B4595 30%,
+    #1E3470 60%,
+    #14342B 100%
   );
   position: relative;
   min-height: 100vh;
 }
 
-.gradient-transition {
-  display: none; /* Plus besoin avec le nouveau gradient */
-}
-
-/* Feature card styling avec bordures colorées */
+/* Feature card styling - ultra simplified */
 .feature-card {
-  backdrop-filter: blur(10px);
-  border: 3px solid;
+  border-radius: 1rem;
+  border: 2px solid transparent;
   position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease-out;
 }
 
 .feature-card.active {
-  background: linear-gradient(135deg, rgba(239, 217, 206, 0.95) 0%, rgba(222, 192, 241, 0.95) 100%);
-  box-shadow: 0 15px 35px rgba(80, 197, 183, 0.3);
+  background-color: rgba(239, 217, 206, 0.95);
   border-color: var(--color-teal);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .feature-card.inactive {
-  background: rgba(239, 217, 206, 0.2);
-  opacity: 0.85;
-  border-color: rgba(222, 192, 241, 0.4);
+  background-color: rgba(20, 52, 43, 0.6);
+  border-color: rgba(80, 197, 183, 0.3);
 }
 
 .feature-card:hover {
-  box-shadow: 0 0 30px rgba(222, 192, 241, 0.5); /* Glow rose/crème seulement */
-  border-color: var(--color-lavender);
   transform: translateX(5px);
+  border-color: var(--color-lavender);
 }
 
-/* Glow effect on hover - rose/crème only */
-.feature-card:hover::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(222, 192, 241, 0.3) 0%, transparent 70%);
-  pointer-events: none;
+.feature-card.inactive:hover {
+  background-color: rgba(20, 52, 43, 0.8);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Effet visuel coloré */
-.feature-card.active::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  background: linear-gradient(90deg, var(--color-teal), var(--color-blue), var(--color-lavender));
-  border-radius: calc(1rem + 6px);
-  z-index: -1;
-  opacity: 0.6;
-  animation: glow 3s ease-in-out infinite;
-}
-
-@keyframes glow {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.02); }
-}
-
-/* Fixed gradient text for Nyto - exactly like hero section */
+/* Gradient text for Nyto */
 .gradient-text-nyto {
   background: linear-gradient(135deg, #50C5B7 20%, #DEC0F1 80%);
   -webkit-background-clip: text;
@@ -257,8 +238,8 @@ onUnmounted(() => {
   text-shadow: none;
   filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
   font-weight: 900;
-  padding-bottom: 0.1em; /* Évite que le bas du y soit coupé */
-  margin: 0 2px; /* Petit espace sur les côtés */
+  padding-bottom: 0.1em;
+  margin: 0 2px;
 }
 
 h2 {
@@ -267,7 +248,7 @@ h2 {
 }
 
 .feature-title {
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
   font-weight: 700;
   font-size: 1.1rem;
   margin-bottom: 0.3rem;
@@ -279,12 +260,12 @@ h2 {
 }
 
 .feature-card.inactive .feature-title {
-  color: #EFD9CE; /* Crème rosé de la palette */
+  color: #EFD9CE;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .feature-description {
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .feature-card.active .feature-description {
@@ -292,11 +273,11 @@ h2 {
 }
 
 .feature-card.inactive .feature-description {
-  color: #EFD9CE; /* Même couleur crème rosé pour la description */
+  color: #EFD9CE;
   opacity: 0.8;
 }
 
-/* Carousel styling avec bordures et effets colorés */
+/* Carousel styling - simplified */
 .carousel-container {
   background: linear-gradient(135deg, rgba(73, 109, 219, 0.95) 0%, rgba(80, 197, 183, 0.95) 100%);
   box-shadow: 0 20px 40px rgba(80, 197, 183, 0.3);
@@ -305,17 +286,21 @@ h2 {
   overflow: hidden;
 }
 
+/* Simplified shimmer effect */
 .carousel-container::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(45deg, transparent 40%, rgba(239, 217, 206, 0.2) 50%, transparent 60%);
-  animation: shimmer 3s infinite;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.8s ease;
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+.carousel-container:hover::before {
+  left: 100%;
+  transition: left 1.5s ease;
 }
 
 .carousel-display {
@@ -324,7 +309,6 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
 }
 
 .carousel-footer {
@@ -333,17 +317,13 @@ h2 {
   padding: 1rem 1.5rem;
 }
 
-.carousel-footer .font-medium {
-  color: var(--color-cream);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
 .feature-indicator {
   background-color: rgba(239, 217, 206, 0.4);
   border: 1px solid rgba(80, 197, 183, 0.5);
   width: 14px;
   height: 14px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .feature-indicator.active {
@@ -360,7 +340,7 @@ h2 {
 
 /* Transitions */
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
 }
 
 .fade-enter-from, .fade-leave-to {
@@ -391,6 +371,18 @@ h2 {
   
   .feature-description {
     font-size: 0.9rem;
+  }
+}
+
+/* Performance optimizations - simplified */
+* {
+  box-sizing: border-box;
+}
+
+/* Disable unnecessary animations during scroll */
+@media (prefers-reduced-motion: no-preference) {
+  .feature-card {
+    transition: transform 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
   }
 }
 </style>
