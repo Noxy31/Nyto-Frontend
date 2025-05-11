@@ -5,7 +5,7 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import Navbar from '@/components/Navbar.vue';
 import HeroSection from '@/components/HomeComponents/HeroSection.vue';
 import FeaturesSection from '@/components/HomeComponents/FeaturesSection.vue';
-import LearningShowcase from '@/components/HomeComponents/LearningShowcaseSection.vue';
+import LearningShowcase from '@/components/HomeComponents/MojidexSection.vue';
 import TestimonialsSection from '@/components/HomeComponents/TestimonialsSection.vue';
 import CTASection from '@/components/HomeComponents/CTASection.vue';
 import FooterSection from '@/components/Footer.vue';
