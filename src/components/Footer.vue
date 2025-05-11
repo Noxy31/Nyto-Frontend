@@ -1,18 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-// Footer category interface
-interface FooterCategory {
-  title: string;
-  links: FooterLink[];
-}
-
-// Footer link interface
-interface FooterLink {
-  text: string;
-  url: string;
-}
-
 // Social link interface
 interface SocialLink {
   name: string;
@@ -20,50 +8,8 @@ interface SocialLink {
   icon: string;
 }
 
-// Language interface
-interface Language {
-  code: string;
-  name: string;
-}
-
-// Footer link categories
-const footerLinks = ref<FooterCategory[]>([
-  {
-    title: 'Learn',
-    links: [
-      { text: 'Courses', url: '#' },
-      { text: 'JLPT Prep', url: '#' },
-      { text: 'Vocabulary', url: '#' },
-      { text: 'Grammar', url: '#' }
-    ]
-  },
-  {
-    title: 'Company',
-    links: [
-      { text: 'About Us', url: '#' },
-      { text: 'Careers', url: '#' },
-      { text: 'Blog', url: '#' },
-      { text: 'Press Kit', url: '#' }
-    ]
-  },
-  {
-    title: 'Support',
-    links: [
-      { text: 'Help Center', url: '#' },
-      { text: 'Contact Us', url: '#' },
-      { text: 'Privacy', url: '#' },
-      { text: 'Terms', url: '#' }
-    ]
-  }
-]);
-
 // Social media links
 const socialLinks = ref<SocialLink[]>([
-  { 
-    name: 'Facebook', 
-    url: '#',
-    icon: `<path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>`
-  },
   { 
     name: 'Twitter', 
     url: '#',
@@ -81,42 +27,6 @@ const socialLinks = ref<SocialLink[]>([
   }
 ]);
 
-// Available languages
-const languages = ref<Language[]>([
-  { code: 'en', name: 'English' },
-  { code: 'ja', name: '日本語' },
-  { code: 'es', name: 'Español' },
-  { code: 'fr', name: 'Français' }
-]);
-
-// Form states
-const email = ref<string>('');
-const isEmailValid = ref<boolean>(true);
-const isSubscribed = ref<boolean>(false);
-const selectedLanguage = ref<string>('en');
-
-// Subscribe to newsletter
-const subscribeToNewsletter = (): void => {
-  // Simple email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  isEmailValid.value = emailRegex.test(email.value);
-  
-  if (isEmailValid.value && email.value) {
-    // Simulating a successful subscription
-    isSubscribed.value = true;
-    setTimeout(() => {
-      email.value = '';
-      isSubscribed.value = false;
-    }, 3000);
-  }
-};
-
-// Change selected language
-const changeLanguage = (event: Event): void => {
-  const target = event.target as HTMLSelectElement;
-  selectedLanguage.value = target.value;
-};
-
 // Hover effects for links
 const hoveredLink = ref<string | null>(null);
 const setHoveredLink = (index: string | null): void => {
@@ -125,36 +35,22 @@ const setHoveredLink = (index: string | null): void => {
 </script>
 
 <template>
-  <footer class="relative pt-24 pb-12 footer-bg">
-    <!-- Wave divider -->
-    <div class="absolute top-0 left-0 right-0 transform -translate-y-full h-24 overflow-hidden">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none" class="h-full w-full">
-        <path class="wave-path" d="M0,128L48,144C96,160,192,192,288,186.7C384,181,480,139,576,138.7C672,139,768,181,864,170.7C960,160,1056,96,1152,69.3C1248,43,1344,53,1392,58.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-      </svg>
-    </div>
-  
+  <footer class="relative py-12 footer-bg">
     <div class="container mx-auto px-6 md:px-12">
-      <!-- Logo and primary links -->
-      <div class="flex flex-col md:flex-row justify-between mb-16">
-        <div class="mb-8 md:mb-0">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <!-- Left side: Logo and social links -->
+        <div class="flex flex-col md:flex-row items-center gap-6">
           <!-- Logo -->
-          <div class="flex items-center mb-4">
-            <div class="text-3xl font-bold logo-text">
-              Nyto<span class="logo-dot">.ai</span>
-            </div>
+          <div class="text-2xl font-bold logo-text">
+            Nyto<span class="logo-accent">.ai</span>
           </div>
           
-          <!-- Tagline -->
-          <p class="max-w-xs tagline">
-            Revolutionizing Japanese language learning through immersive AI technology.
-          </p>
-          
           <!-- Social links -->
-          <div class="flex space-x-4 mt-6">
+          <div class="flex items-center gap-3">
             <a v-for="(social, index) in socialLinks" 
                :key="social.name"
                :href="social.url"
-               class="w-10 h-10 rounded-full flex items-center justify-center transition-all transform hover:scale-110 social-link"
+               class="social-link"
                :class="{ 'active': hoveredLink === `social-${index}` }"
                @mouseenter="setHoveredLink(`social-${index}`)"
                @mouseleave="setHoveredLink(null)">
@@ -163,83 +59,19 @@ const setHoveredLink = (index: string | null): void => {
           </div>
         </div>
         
-        <!-- Footer navigation links -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-          <div v-for="(category, i) in footerLinks" :key="i">
-            <h5 class="text-lg font-bold mb-4 footer-category">{{ category.title }}</h5>
-            <ul class="space-y-3">
-              <li v-for="(link, j) in category.links" :key="j">
-                <a :href="link.url" 
-                   class="hover:underline footer-link"
-                   :class="{ 'active': hoveredLink === `link-${i}-${j}` }"
-                   @mouseenter="setHoveredLink(`link-${i}-${j}`)"
-                   @mouseleave="setHoveredLink(null)">
-                  {{ link.text }}
-                </a>
-              </li>
-            </ul>
+        <!-- Right side: Credits, legal and copyright -->
+        <div class="flex flex-col md:flex-row items-center gap-6 text-sm">
+          <div class="developer-credit">
+            Developed by <span class="developer-name">Nox</span>
           </div>
-        </div>
-      </div>
-      
-      <!-- Newsletter subscription -->
-      <div class="py-8 my-8 border-t border-b newsletter-container">
-        <div class="flex flex-col md:flex-row md:items-center justify-between">
-          <div class="mb-6 md:mb-0 md:mr-8">
-            <h5 class="text-lg font-bold mb-2 newsletter-title">Stay up to date</h5>
-            <p class="newsletter-text">Subscribe to our newsletter for learning tips and updates.</p>
+          <div class="legal-links">
+            <a href="#" class="legal-link">Privacy Policy</a>
+            <span class="separator">•</span>
+            <a href="#" class="legal-link">Terms of Service</a>
           </div>
-          
-          <div class="flex flex-col sm:flex-row w-full md:w-auto">
-            <div class="relative flex-grow">
-              <input 
-                v-model="email"
-                type="email" 
-                placeholder="Enter your email" 
-                class="px-4 py-3 rounded-l-full sm:w-64 focus:outline-none newsletter-input" 
-                :class="{ 'error': !isEmailValid }"
-              >
-              <div v-if="!isEmailValid" class="absolute -bottom-6 left-0 text-xs text-red-500">
-                Please enter a valid email address
-              </div>
-              <div v-if="isSubscribed" class="absolute -bottom-6 left-0 text-xs text-green-500">
-                Successfully subscribed!
-              </div>
-            </div>
-            <button 
-              @click="subscribeToNewsletter"
-              class="px-6 py-3 rounded-r-full font-medium newsletter-button">
-              Subscribe
-            </button>
+          <div class="copyright">
+            © {{ new Date().getFullYear() }} Nyto.ai
           </div>
-        </div>
-      </div>
-      
-      <!-- Copyright and language selector -->
-      <div class="flex flex-col md:flex-row items-center justify-between">
-        <div class="mb-4 md:mb-0 text-sm copyright">
-          © {{ new Date().getFullYear() }} Nyto.ai. All rights reserved.
-        </div>
-        
-        <div class="flex items-center space-x-6">
-          <div class="relative">
-            <select 
-              v-model="selectedLanguage"
-              @change="changeLanguage"
-              class="appearance-none px-4 py-2 pr-8 rounded-lg cursor-pointer focus:outline-none language-selector">
-              <option v-for="lang in languages" :key="lang.code" :value="lang.code">
-                {{ lang.name }}
-              </option>
-            </select>
-            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none dropdown-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-          
-          <a href="#" class="text-sm hover:underline policy-link">Privacy Policy</a>
-          <a href="#" class="text-sm hover:underline policy-link">Terms of Service</a>
         </div>
       </div>
     </div>
@@ -249,125 +81,103 @@ const setHoveredLink = (index: string | null): void => {
 <style scoped>
 /* Color variables */
 :root {
-  --color-primary: #4B3B47;
-  --color-secondary: #6A6262;
-  --color-accent: #9C9990;
-  --color-light: #CFD2B2;
-  --color-bg: #E0D8DE;
+  --color-cream: #EFD9CE;
+  --color-lavender: #DEC0F1;
+  --color-teal: #50C5B7;
+  --color-blue: #496DDB;
+  --color-dark-green: #14342B;
 }
 
+/* Background with subtle gradient */
 .footer-bg {
-  background-color: var(--color-bg);
-}
-
-.wave-path {
-  fill: var(--color-secondary);
+  background: linear-gradient(135deg, 
+    var(--color-cream) 0%, 
+    rgba(222, 192, 241, 0.3) 50%, 
+    rgba(80, 197, 183, 0.2) 100%
+  );
+  border-top: 1px solid rgba(20, 52, 43, 0.1);
 }
 
 /* Logo styling */
 .logo-text {
-  color: var(--color-primary);
+  color: var(--color-dark-green);
 }
 
-.logo-dot {
-  color: var(--color-secondary);
-}
-
-.tagline {
-  color: var(--color-secondary);
+.logo-accent {
+  color: var(--color-teal);
 }
 
 /* Social links */
 .social-link {
-  background-color: var(--color-primary);
-  color: var(--color-bg);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-lavender) 100%);
+  color: white;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .social-link:hover,
 .social-link.active {
   transform: scale(1.1);
-  box-shadow: 0 4px 10px rgba(75, 59, 71, 0.3);
+  box-shadow: 0 5px 15px rgba(80, 197, 183, 0.3);
 }
 
-/* Footer categories and links */
-.footer-category {
-  color: var(--color-primary);
+/* Credits and copyright */
+.developer-credit {
+  color: var(--color-dark-green);
+  opacity: 0.8;
 }
 
-.footer-link {
-  color: var(--color-secondary);
-  transition: all 0.2s ease;
+.developer-name {
+  font-weight: 700;
+  color: var(--color-blue);
 }
 
-.footer-link:hover,
-.footer-link.active {
-  color: var(--color-primary);
-  text-decoration: underline;
-}
-
-/* Newsletter section */
-.newsletter-container {
-  border-color: rgba(106, 98, 98, 0.2);
-}
-
-.newsletter-title {
-  color: var(--color-primary);
-}
-
-.newsletter-text {
-  color: var(--color-secondary);
-}
-
-.newsletter-input {
-  border: 2px solid var(--color-light);
-  border-right: none;
-  color: var(--color-primary);
-}
-
-.newsletter-input.error {
-  border-color: #e53e3e;
-}
-
-.newsletter-input:focus {
-  border-color: var(--color-primary);
-}
-
-.newsletter-button {
-  background-color: var(--color-primary);
-  color: var(--color-light);
-  transition: all 0.3s ease;
-}
-
-.newsletter-button:hover {
-  background-color: #594453;
-}
-
-/* Copyright and language selector */
 .copyright {
-  color: var(--color-secondary);
+  color: var(--color-dark-green);
+  opacity: 0.7;
 }
 
-.language-selector {
-  background-color: rgba(207, 210, 178, 0.3);
-  color: var(--color-primary);
-  transition: all 0.3s ease;
+/* Legal links */
+.legal-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-dark-green);
+  opacity: 0.7;
 }
 
-.language-selector:hover {
-  background-color: rgba(207, 210, 178, 0.5);
-}
-
-.dropdown-icon {
-  color: var(--color-primary);
-}
-
-.policy-link {
-  color: var(--color-secondary);
+.legal-link {
+  color: var(--color-dark-green);
+  opacity: 0.8;
   transition: all 0.2s ease;
 }
 
-.policy-link:hover {
-  color: var(--color-primary);
+.legal-link:hover {
+  color: var(--color-teal);
+  opacity: 1;
+}
+
+.separator {
+  opacity: 0.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-bg {
+    padding: 2rem 0;
+  }
+  
+  .logo-text {
+    font-size: 1.5rem;
+  }
+  
+  .legal-links {
+    order: 3;
+  }
 }
 </style>
