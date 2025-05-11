@@ -1,13 +1,4 @@
-/* Isolation container to prevent global CSS interference */
-.features-container {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-.feature-list {
-  position: relative;
-  z-index: 1;
-}<script setup lang="ts">
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 
 // Props
@@ -106,12 +97,15 @@ onUnmounted(() => {
 
 <template>
   <section id="features" class="relative features-bg overflow-hidden">
-    <div class="container mx-auto px-6 md:px-12 py-24 relative z-10">
-      <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 transition-all duration-1000 transform"
-          :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
-          style="line-height: 1.3;">
-        The <span class="gradient-text-nyto">Nyto</span> Experience
-      </h2>
+    <div class="container mx-auto px-6 md:px-12 py-16 relative z-10">
+      <div class="text-center mb-16 transition-all duration-1000 transform"
+           :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'">
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-6" style="line-height: 1.2; color: #EFD9CE;">
+          <span>The </span>
+          <span class="gradient-text-nyto inline-block">Nyto</span>
+          <span class="block">Experience</span>
+        </h2>
+      </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center features-container">
         <!-- Feature list -->
@@ -235,16 +229,10 @@ onUnmounted(() => {
   background-clip: text;
   display: inline-block;
   position: relative;
+  font-weight: 900;
   text-shadow: none;
   filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
-  font-weight: 900;
-  padding-bottom: 0.1em;
-  margin: 0 2px;
-}
-
-h2 {
-  color: var(--color-cream);
-  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  padding-bottom: 0.1em; /* Ajout d'un petit padding pour éviter le rognage */
 }
 
 .feature-title {
@@ -371,6 +359,12 @@ h2 {
   
   .feature-description {
     font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 768px) {
+  h2 {
+    font-size: 4.5rem !important;
   }
 }
 

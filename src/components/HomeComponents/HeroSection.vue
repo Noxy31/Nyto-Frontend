@@ -12,7 +12,7 @@ const props = defineProps<HeroSectionProps>();
 const animationActive = ref<boolean>(false);
 const textVisible = ref<boolean>(false);
 
-// Japanese symbols for background - STATIC, no animation
+// Japanese symbols for background
 interface Symbol {
   id: number;
   char: string;
@@ -51,8 +51,8 @@ const symbols = reactive<Symbol[]>(generateSymbols());
 // Central display characters with meaning
 const centerKanjis = reactive([
   { char: '学', meaning: 'study', active: false, color: '#50C5B7', delay: 0.2 },
-  { char: '漢', meaning: 'kanji', active: false, color: '#496DDB', delay: 0.5 },
-  { char: '上', meaning: 'advance', active: false, color: '#DEC0F1', delay: 0.8 }
+  { char: '進', meaning: 'progress', active: false, color: '#496DDB', delay: 0.5 },
+  { char: '成', meaning: 'accomplish', active: false, color: '#DEC0F1', delay: 0.8 }
 ]);
 
 // Initialize animations

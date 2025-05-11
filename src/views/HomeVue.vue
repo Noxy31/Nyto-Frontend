@@ -5,8 +5,7 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import Navbar from '@/components/Navbar.vue';
 import HeroSection from '@/components/HomeComponents/HeroSection.vue';
 import FeaturesSection from '@/components/HomeComponents/FeaturesSection.vue';
-import LearningShowcase from '@/components/HomeComponents/MojidexSection.vue';
-import TestimonialsSection from '@/components/HomeComponents/TestimonialsSection.vue';
+import MojidexSection from '@/components/HomeComponents/MojidexSection.vue';
 import CTASection from '@/components/HomeComponents/CTASection.vue';
 import FooterSection from '@/components/Footer.vue';
 
@@ -92,10 +91,7 @@ onUnmounted(() => {
     <FeaturesSection :isVisible="sectionVisibility.features" class="section-animate" id="features" />
     
     <!-- Learning Showcase Component -->
-    <LearningShowcase :isVisible="sectionVisibility.showcase" class="section-animate" id="showcase" />
-    
-    <!-- Testimonials Section Component -->
-    <TestimonialsSection :isVisible="sectionVisibility.testimonials" class="section-animate" id="testimonials" />
+    <MojidexSection :isVisible="sectionVisibility.showcase" class="section-animate" id="showcase" />
     
     <!-- CTA Section Component -->
     <CTASection :isVisible="sectionVisibility.action" class="section-animate" id="action" />

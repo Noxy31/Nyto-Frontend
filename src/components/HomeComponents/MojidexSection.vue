@@ -28,7 +28,7 @@ interface YokaiCard {
   color: string;
   level?: number;
   description?: string;
-  quote?: string; // Nouvelle propriété pour les commentaires
+  quote?: string;
 }
 
 // Sample Yokai cards data with real images and quotes
@@ -117,24 +117,6 @@ onMounted(() => {
     }, 500);
   });
 });
-
-// Stats for progress display
-const mojidexStats = reactive({
-  totalCards: 1200,
-  unlockedCards: 156,
-  kanjiMastered: 89,
-  wordsLearned: 435,
-  rarityBreakdown: {
-    common: 85,
-    rare: 45,
-    legendary: 20,
-    mythic: 6
-  }
-});
-
-const progressPercentage = computed(() => 
-  Math.round((mojidexStats.unlockedCards / mojidexStats.totalCards) * 100)
-);
 </script>
 
 <template>
@@ -155,31 +137,48 @@ const progressPercentage = computed(() =>
         </p>
       </div>
 
-      <!-- Progress stats -->
+      <!-- Yokai explanation section -->
       <div class="mb-12 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.2s;">
-        <div class="stats-container">
-          <div class="stats-grid">
-            <div class="stat-item">
-              <div class="stat-value">{{ mojidexStats.unlockedCards }}</div>
-              <div class="stat-label">Cards Unlocked</div>
-              <div class="stat-progress">
-                <div class="progress-bar" :style="{ width: `${progressPercentage}%` }"></div>
+        <div class="yokai-explanation-container">
+          <div class="yokai-explanation-grid">
+            <div class="yokai-info-section">
+              <div class="yokai-info-header">
+                <span class="yokai-icon">👺</span>
+                <h3 class="yokai-title">The Spirit of Learning</h3>
               </div>
+              <p class="yokai-description">
+                In Japanese folklore, <span class="highlight-text">Yokai</span> are supernatural beings that embody 
+                the mysteries and wonders of nature. Each spirit carries unique characteristics, stories, and powers 
+                that have captivated imaginations for centuries.
+              </p>
             </div>
             
-            <div class="stat-item">
-              <div class="stat-value">{{ mojidexStats.kanjiMastered }}</div>
-              <div class="stat-label">Kanji Mastered</div>
+            <div class="mojidex-benefit-section">
+              <div class="mojidex-info-header">
+                <span class="mojidex-icon">🎴</span>
+                <h3 class="mojidex-title">Memory Through Stories</h3>
+              </div>
+              <p class="mojidex-description">
+                Our Mojidex transforms each kanji into a memorable Yokai character, creating 
+                <span class="highlight-text">visual and emotional connections</span> that enhance retention. 
+                By associating characters with unique spirits and their evolving stories, 
+                learning becomes an adventure where every new word is a discovery.
+              </p>
             </div>
-            
-            <div class="stat-item">
-              <div class="stat-value">{{ mojidexStats.wordsLearned }}</div>
-              <div class="stat-label">Words Learned</div>
+          </div>
+          
+          <div class="learning-benefits">
+            <div class="benefit-item">
+              <span class="benefit-icon">🧠</span>
+              <span class="benefit-text">Enhanced memory through visual association</span>
             </div>
-            
-            <div class="stat-item">
-              <div class="stat-value">{{ mojidexStats.rarityBreakdown.mythic }}</div>
-              <div class="stat-label">Mythic Yokai</div>
+            <div class="benefit-item">
+              <span class="benefit-icon">📚</span>
+              <span class="benefit-text">Story-based learning for deeper understanding</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-icon">🎮</span>
+              <span class="benefit-text">Gamified progression with collectible rewards</span>
             </div>
           </div>
         </div>
@@ -329,54 +328,118 @@ const progressPercentage = computed(() =>
   opacity: 0.9;
 }
 
-/* Stats container */
-.stats-container {
-  background: rgba(255, 255, 255, 0.8);
+/* Yokai explanation styling */
+.yokai-explanation-container {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.98) 0%, 
+    rgba(222, 192, 241, 0.15) 30%, 
+    rgba(80, 197, 183, 0.1) 70%, 
+    rgba(73, 109, 219, 0.08) 100%
+  );
   backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(80, 197, 183, 0.2);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--color-blue);
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  color: var(--color-dark-green);
-  opacity: 0.8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.stat-progress {
-  margin-top: 0.5rem;
-  height: 4px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
+  border-radius: 25px;
+  padding: 2.5rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(222, 192, 241, 0.3);
+  position: relative;
   overflow: hidden;
 }
 
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-teal), var(--color-blue));
-  border-radius: 2px;
-  transition: width 0.8s ease;
+.yokai-explanation-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 30% 40%, rgba(80, 197, 183, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(222, 192, 241, 0.12) 0%, transparent 50%);
+  animation: pulse 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.3; }
+}
+
+.yokai-explanation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.yokai-info-header, .mojidex-info-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.yokai-icon, .mojidex-icon {
+  font-size: 2.5rem;
+  display: inline-block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.yokai-title, .mojidex-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-dark-green);
+}
+
+.yokai-description, .mojidex-description {
+  color: var(--color-dark-green);
+  line-height: 1.7;
+  font-size: 1.05rem;
+  opacity: 0.9;
+}
+
+.highlight-text {
+  color: var(--color-blue);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-teal);
+  padding-bottom: 1px;
+}
+
+.learning-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid rgba(80, 197, 183, 0.2);
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(80, 197, 183, 0.1);
+  padding: 0.75rem 1.25rem;
+  border-radius: 30px;
+  border: 1px solid rgba(80, 197, 183, 0.3);
+  transition: all 0.3s ease;
+}
+
+.benefit-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(80, 197, 183, 0.2);
+  background: rgba(80, 197, 183, 0.15);
+}
+
+.benefit-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.benefit-text {
+  font-size: 0.95rem;
+  color: var(--color-dark-green);
+  font-weight: 500;
 }
 
 /* Yokai cards grid */
@@ -518,20 +581,32 @@ const progressPercentage = computed(() =>
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .yokai-card {
-    aspect-ratio: 1;
+  .yokai-explanation-container {
+    padding: 1.75rem;
   }
   
-  .japanese-char {
-    font-size: 3rem;
+  .yokai-explanation-grid {
+    gap: 1.5rem;
+  }
+  
+  .yokai-title, .mojidex-title {
+    font-size: 1.3rem;
+  }
+  
+  .learning-benefits {
+    gap: 1rem;
+  }
+  
+  .benefit-item {
+    padding: 0.6rem 1rem;
+  }
+  
+  .benefit-text {
+    font-size: 0.85rem;
   }
   
   .section-title {
     font-size: 2.5rem;
-  }
-  
-  .stat-value {
-    font-size: 2rem;
   }
   
   .features-title, .cta-title {
