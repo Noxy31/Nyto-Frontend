@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
+import { Home, BookOpen, Users, Award, LogIn } from 'lucide-vue-next';
 
 // Props
 interface NavbarProps {
@@ -47,13 +48,14 @@ watch(() => props.scrollY, (newVal: number) => {
 interface NavItem {
   id: string;
   label: string;
+  icon: any;
 }
 
 const navItems: NavItem[] = [
-  { id: 'hero', label: 'Home' },
-  { id: 'features', label: 'Features' },
-  { id: 'showcase', label: 'Learning' },
-  { id: 'testimonials', label: 'Community' }
+  { id: 'hero', label: 'Home', icon: Home },
+  { id: 'features', label: 'Features', icon: Award },
+  { id: 'showcase', label: 'Learning', icon: BookOpen },
+  { id: 'testimonials', label: 'Community', icon: Users }
 ];
 </script>
 
@@ -84,7 +86,10 @@ const navItems: NavItem[] = [
                 @click="setActiveSection(item.id)"
                 class="px-4 py-2.5 rounded-full nav-item transition-all duration-300 relative overflow-hidden group text-sm"
                 :class="activeSection === item.id ? 'nav-item-active' : ''">
-                <span class="relative z-10">{{ item.label }}</span>
+                <span class="relative z-10 flex items-center">
+                  <component :is="item.icon" class="w-4 h-4 mr-2" />
+                  {{ item.label }}
+                </span>
                 <span class="absolute inset-0 nav-item-bg transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
                       :class="{'scale-x-100': activeSection === item.id}"></span>
               </button>
@@ -95,7 +100,8 @@ const navItems: NavItem[] = [
             <button class="px-5 py-2.5 rounded-md nav-cta-button transition-all duration-300 transform hover:-translate-y-1 text-sm">
               Start Learning
             </button>
-            <button class="px-5 py-2.5 rounded-md nav-login-button transition-all duration-300 transform hover:-translate-y-1 text-sm">
+            <button class="px-5 py-2.5 rounded-md nav-login-button transition-all duration-300 transform hover:-translate-y-1 text-sm flex items-center">
+              <LogIn class="w-4 h-4 mr-2" />
               Log In
             </button>
           </div>
@@ -127,8 +133,9 @@ const navItems: NavItem[] = [
           v-for="item in navItems" 
           :key="item.id"
           @click="setActiveSection(item.id)"
-          class="block w-full text-left py-3 px-4 rounded-lg transition-all duration-200"
+          class="block w-full text-left py-3 px-4 rounded-lg transition-all duration-200 flex items-center"
           :class="activeSection === item.id ? 'mobile-nav-active' : 'mobile-nav-item'">
+          <component :is="item.icon" class="w-5 h-5 mr-3" />
           {{ item.label }}
         </button>
         
@@ -137,7 +144,8 @@ const navItems: NavItem[] = [
             Start Learning
           </button>
           
-          <button class="w-full p-3 rounded-md mobile-login transition-all duration-300">
+          <button class="w-full p-3 rounded-md mobile-login transition-all duration-300 flex items-center justify-center">
+            <LogIn class="w-5 h-5 mr-2" />
             Log In
           </button>
         </div>
@@ -156,15 +164,15 @@ const navItems: NavItem[] = [
   --color-dark-green: #14342B; /* Vert foncé */
 }
 
-/* Navbar styling - FOND CLAIR COMME LES FEATURES */
+/* Navbar styling - Fond transparent avec une teinte blanche */
 header {
-  background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.9));
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-scrolled {
-  background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.95));
+  background: rgba(255, 255, 255, 0.85);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
@@ -181,12 +189,15 @@ header {
   100% { background-position: 0% 50%; }
 }
 
-/* Navigation items - TEXTE FONCÉ */
+/* Navigation items - Polices améliorées et style plus moderne */
 .nav-item {
   color: var(--color-dark-green);
   font-weight: 500;
   position: relative;
   letter-spacing: 0.3px;
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
 }
 
 .nav-item:hover {
@@ -215,6 +226,7 @@ header {
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
   letter-spacing: 0.5px;
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
 }
 
 .nav-cta-button:hover {
@@ -229,6 +241,9 @@ header {
   font-weight: 500;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
 }
 
 .nav-login-button:hover {
@@ -238,9 +253,10 @@ header {
   box-shadow: 0 4px 12px rgba(222, 192, 241, 0.3);
 }
 
-/* Mobile menu */
+/* Mobile menu avec fond transparent */
 .mobile-menu {
-  background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.95));
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
   border-top: 1px solid rgba(80, 197, 183, 0.3);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
@@ -251,6 +267,7 @@ header {
   border-left: 3px solid transparent;
   transition: all 0.3s ease;
   font-weight: 500;
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
 }
 
 .mobile-nav-item:hover {
@@ -263,6 +280,7 @@ header {
   background: linear-gradient(to right, rgba(80, 197, 183, 0.3), rgba(222, 192, 241, 0.3));
   font-weight: 600;
   border-left: 3px solid var(--color-blue);
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
 }
 
 .mobile-cta {
@@ -271,6 +289,7 @@ header {
   font-weight: 600;
   letter-spacing: 0.5px;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
 }
 
 .mobile-cta:hover {
@@ -283,6 +302,7 @@ header {
   border: 2px solid var(--color-lavender);
   color: var(--color-dark-green);
   font-weight: 500;
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
 }
 
 .mobile-login:hover {
