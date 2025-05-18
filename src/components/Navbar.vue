@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { Home, BookOpen, Users, Award, LogIn } from 'lucide-vue-next';
+import { Home, Star, Library, Tag, LogIn } from 'lucide-vue-next';
 
 // Props
 interface NavbarProps {
@@ -53,9 +53,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'hero', label: 'Home', icon: Home },
-  { id: 'features', label: 'Features', icon: Award },
-  { id: 'showcase', label: 'Learning', icon: BookOpen },
-  { id: 'testimonials', label: 'Community', icon: Users }
+  { id: 'features', label: 'Features', icon: Star },
+  { id: 'showcase', label: 'Mojidex', icon: Library },
+  { id: 'action', label: 'Pricing', icon: Tag }
 ];
 </script>
 

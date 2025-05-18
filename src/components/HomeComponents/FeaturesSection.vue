@@ -1,5 +1,12 @@
-<script setup lang="ts">
+.feature-card.inactive:hover .feature-icon-container {
+  background: rgba(239, 217, 206, 0.9); /* Plus opaque au survol */
+}
+
+.feature-card.inactive:hover .feature-icon {
+  color: var(--color-dark-green); /* Icône devient noire au survol */
+}<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { GraduationCap, Target, BookOpen, TrendingUp } from 'lucide-vue-next';
 
 // Props
 interface FeaturesSectionProps {
@@ -12,49 +19,39 @@ const props = defineProps<FeaturesSectionProps>();
 interface Feature {
   title: string;
   description: string;
-  icon: string;
+  icon: any;
   active: boolean;
 }
 
-// Features data avec nouvelles descriptions
+// Features data optimized
 const features = ref<Feature[]>([
   { 
     title: "All Levels Courses",
     description: "Start from the basics with hiragana/katakana learning, progress through fundamental kanji, and advance through structured levels from N5 to N1 proficiency.",
-    icon: "🎓",
+    icon: GraduationCap,
     active: true
   },
   { 
     title: "Interactive Exercises",
     description: "Apply what you've learned through original games and activities that make Japanese learning fun and engaging.",
-    icon: "🎯",
+    icon: Target,
     active: false
   },
   { 
     title: "Mojidex Collection",
     description: "Store all learned characters and words in your personal dictionary with usage examples and comprehensive information, all associated to a unique Yokai illustration.",
-    icon: "📖",
+    icon: BookOpen,
     active: false
   },
   { 
     title: "Progress Tracking",
     description: "Track your progression with rewards system, adaptive difficulty exercises, and smart features designed for real-world Japanese usage.",
-    icon: "📊",
+    icon: TrendingUp,
     active: false
   }
 ]);
 
-// Carousel images placeholder
-const carouselImages = ref<string[]>([
-  '/images/learning-1.jpg',
-  '/images/learning-2.jpg',
-  '/images/learning-3.jpg',
-  '/images/learning-4.jpg'
-]);
-
 const currentImageIndex = ref(0);
-
-// Pause/Resume rotation on hover
 const isPaused = ref(false);
 
 // Activate feature by index
@@ -65,17 +62,16 @@ const activateFeature = (index: number): void => {
   currentImageIndex.value = index;
 };
 
-// Pause rotation
+// Pause/Resume rotation
 const pauseRotation = () => {
   isPaused.value = true;
 };
 
-// Resume rotation
 const resumeRotation = () => {
   isPaused.value = false;
 };
 
-// Rotate through features automatically
+// Optimized rotation - longer intervals
 let featureInterval: number | undefined;
 
 onMounted(() => {
@@ -85,7 +81,7 @@ onMounted(() => {
       const nextIndex = (activeIndex + 1) % features.value.length;
       activateFeature(nextIndex);
     }
-  }, 5000);
+  }, 6000); // Increased from 5s to 6s
 });
 
 onUnmounted(() => {
@@ -98,18 +94,20 @@ onUnmounted(() => {
 <template>
   <section id="features" class="relative features-bg overflow-hidden">
     <div class="container mx-auto px-6 md:px-12 py-16 relative z-10">
-      <div class="text-center mb-16 transition-all duration-1000 transform"
+      <!-- Header section -->
+      <div class="text-center mb-16 transition-all duration-800 transform"
            :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'">
-        <h2 class="text-4xl md:text-6xl font-extrabold mb-6" style="line-height: 1.2; color: #EFD9CE;">
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-6" style="line-height: 1.2; color: white;">
           <span>The </span>
           <span class="gradient-text-nyto inline-block">Nyto</span>
           <span class="block">Experience</span>
         </h2>
       </div>
       
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center features-container">
+      <!-- Main content grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <!-- Feature list -->
-        <div class="space-y-6 feature-list">
+        <div class="space-y-6">
           <div v-for="(feature, index) in features" 
                :key="index"
                @mouseenter="() => { activateFeature(index); pauseRotation(); }"
@@ -117,9 +115,11 @@ onUnmounted(() => {
                class="p-6 rounded-2xl cursor-pointer feature-card"
                :class="feature.active ? 'active' : 'inactive'">
             <div class="flex items-start space-x-4 relative z-10">
-              <div class="text-3xl feature-icon flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                {{ feature.icon }}
+              <!-- Icon container -->
+              <div class="feature-icon-container flex-shrink-0">
+                <component :is="feature.icon" class="feature-icon" />
               </div>
+              <!-- Content -->
               <div class="flex-1">
                 <h3 class="text-xl font-bold mb-2 feature-title">{{ feature.title }}</h3>
                 <p class="feature-description text-sm leading-relaxed">
@@ -131,28 +131,33 @@ onUnmounted(() => {
         </div>
         
         <!-- Carousel display -->
-        <div class="rounded-3xl overflow-hidden shadow-2xl transform transition-all duration-1000 carousel-container"
+        <div class="rounded-3xl overflow-hidden shadow-2xl transform transition-all duration-800 carousel-container"
              :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'">
-          <div class="aspect-w-16 aspect-h-9 carousel-display">
-            <!-- Image placeholder -->
+          <!-- Main display area -->
+          <div class="carousel-display">
             <div class="w-full h-full flex items-center justify-center">
               <transition name="fade" mode="out-in">
                 <div :key="currentImageIndex" class="text-center p-8">
-                  <div class="text-6xl mb-4 drop-shadow-lg">{{ features[currentImageIndex].icon }}</div>
-                  <p class="text-lg font-medium text-cream drop-shadow">
-                    Learning Interface Preview
-                  </p>
-                  <p class="text-sm text-cream/80 mt-2">
-                    Images coming soon
+                  <!-- Large icon -->
+                  <div class="feature-icon-large mb-6">
+                    <component :is="features[currentImageIndex].icon" class="icon-large" />
+                  </div>
+                  <!-- Feature info -->
+                  <h3 class="text-xl font-bold text-cream mb-2">
+                    {{ features[currentImageIndex].title }}
+                  </h3>
+                  <p class="text-sm text-cream/80">
+                    Interface preview coming soon
                   </p>
                 </div>
               </transition>
             </div>
           </div>
           
+          <!-- Footer with indicators -->
           <div class="py-4 px-6 carousel-footer">
             <div class="flex justify-center items-center">
-              <div class="flex space-x-2">
+              <div class="flex space-x-3">
                 <button v-for="(feature, index) in features" 
                         :key="index"
                         @click="activateFeature(index)"
@@ -170,7 +175,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Color variables - New palette */
+/* Color variables */
 :root {
   --color-cream: #EFD9CE;
   --color-lavender: #DEC0F1;
@@ -179,35 +184,41 @@ onUnmounted(() => {
   --color-dark-green: #14342B;
 }
 
-/* Background with smooth gradient transition from hero */
+/* Background */
 .features-bg {
   background: linear-gradient(180deg, 
     #496DDB 0%,
-    #3856B3 10%,
-    #2B4595 30%,
-    #1E3470 60%,
+    #3856B3 15%,
+    #2B4595 35%,
+    #1E3470 65%,
     #14342B 100%
   );
   position: relative;
   min-height: 100vh;
 }
 
-/* Feature card styling - ultra simplified */
+/* Text colors */
+.text-cream {
+  color: var(--color-cream);
+}
+
+/* Feature card styling */
 .feature-card {
   border-radius: 1rem;
   border: 2px solid transparent;
   position: relative;
-  transition: all 0.2s ease-out;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .feature-card.active {
-  background-color: rgba(239, 217, 206, 0.95);
+  background: rgba(239, 217, 206, 0.95);
   border-color: var(--color-teal);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .feature-card.inactive {
-  background-color: rgba(20, 52, 43, 0.6);
+  background: rgba(20, 52, 43, 0.6);
   border-color: rgba(80, 197, 183, 0.3);
 }
 
@@ -217,8 +228,83 @@ onUnmounted(() => {
 }
 
 .feature-card.inactive:hover {
-  background-color: rgba(20, 52, 43, 0.8);
+  background: rgba(20, 52, 43, 0.8);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon styling */
+.feature-icon-container {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card.active .feature-icon-container {
+  background: linear-gradient(135deg, var(--color-teal), var(--color-blue));
+}
+
+.feature-card.inactive .feature-icon-container {
+  background: rgba(239, 217, 206, 0.2);
+  border: 1px solid rgba(239, 217, 206, 0.3);
+}
+
+.feature-icon {
+  width: 28px;
+  height: 28px;
+  transition: all 0.3s ease;
+}
+
+.feature-card.active .feature-icon {
+  color: white;
+}
+
+.feature-card.inactive .feature-icon {
+  color: var(--color-cream);
+}
+
+/* Title styling */
+.feature-title {
+  transition: color 0.3s ease;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: white; /* Par défaut en blanc */
+}
+
+.feature-card.active .feature-title {
+  color: var(--color-dark-green); /* Noir quand actif */
+}
+
+.feature-card.inactive .feature-title {
+  color: white; /* Blanc quand inactif */
+}
+
+.feature-card.inactive:hover .feature-title {
+  color: var(--color-dark-green); /* Noir au survol */
+}
+
+/* Description styling */
+.feature-description {
+  transition: all 0.3s ease;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9); /* Par défaut en blanc transparent */
+}
+
+.feature-card.active .feature-description {
+  color: rgba(20, 52, 43, 0.9); /* Noir quand actif */
+}
+
+.feature-card.inactive .feature-description {
+  color: rgba(255, 255, 255, 0.9); /* Blanc quand inactif */
+}
+
+.feature-card.inactive:hover .feature-description {
+  color: rgba(20, 52, 43, 0.8); /* Noir au survol */
 }
 
 /* Gradient text for Nyto */
@@ -230,98 +316,80 @@ onUnmounted(() => {
   display: inline-block;
   position: relative;
   font-weight: 900;
-  text-shadow: none;
   filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
-  padding-bottom: 0.1em; /* Ajout d'un petit padding pour éviter le rognage */
 }
 
-.feature-title {
-  transition: color 0.2s ease;
-  font-weight: 700;
-  font-size: 1.1rem;
-  margin-bottom: 0.3rem;
-}
-
-/* Title colors based on card state */
-.feature-card.active .feature-title {
-  color: var(--color-dark-green);
-}
-
-.feature-card.inactive .feature-title {
-  color: #EFD9CE;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.feature-description {
-  transition: all 0.2s ease;
-}
-
-.feature-card.active .feature-description {
-  color: rgba(20, 52, 43, 0.9);
-}
-
-.feature-card.inactive .feature-description {
-  color: #EFD9CE;
-  opacity: 0.8;
-}
-
-/* Carousel styling - simplified */
+/* Carousel styling */
 .carousel-container {
-  background: linear-gradient(135deg, rgba(73, 109, 219, 0.95) 0%, rgba(80, 197, 183, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(73, 109, 219, 0.9) 0%, rgba(80, 197, 183, 0.9) 100%);
   box-shadow: 0 20px 40px rgba(80, 197, 183, 0.3);
   border: 3px solid var(--color-lavender);
   position: relative;
-  overflow: hidden;
-}
-
-/* Simplified shimmer effect */
-.carousel-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.8s ease;
-}
-
-.carousel-container:hover::before {
-  left: 100%;
-  transition: left 1.5s ease;
 }
 
 .carousel-display {
-  background: linear-gradient(to br, rgba(20, 52, 43, 0.9), rgba(20, 52, 43, 0.95));
+  background: linear-gradient(to bottom right, rgba(20, 52, 43, 0.9), rgba(20, 52, 43, 0.95));
   min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* Large icon for carousel */
+.feature-icon-large {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, var(--color-teal), var(--color-blue));
+  border-radius: 50%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.feature-icon-large::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(135deg, var(--color-lavender), var(--color-teal));
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.icon-large {
+  width: 60px;
+  height: 60px;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Carousel footer */
 .carousel-footer {
-  background: linear-gradient(90deg, rgba(20, 52, 43, 0.98) 0%, rgba(73, 109, 219, 0.98) 100%);
+  background: linear-gradient(90deg, rgba(20, 52, 43, 0.95) 0%, rgba(73, 109, 219, 0.95) 100%);
   border-top: 2px solid var(--color-teal);
   padding: 1rem 1.5rem;
 }
 
+/* Feature indicators */
 .feature-indicator {
-  background-color: rgba(239, 217, 206, 0.4);
+  background: rgba(239, 217, 206, 0.4);
   border: 1px solid rgba(80, 197, 183, 0.5);
-  width: 14px;
-  height: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .feature-indicator.active {
-  background-color: var(--color-teal);
+  background: var(--color-teal);
   transform: scale(1.3);
   box-shadow: 0 0 10px var(--color-teal);
 }
 
 .feature-indicator:hover:not(.active) {
-  background-color: var(--color-lavender);
+  background: var(--color-lavender);
   transform: scale(1.2);
   border-color: var(--color-lavender);
 }
@@ -335,22 +403,6 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* Aspect ratios */
-.aspect-w-16 {
-  position: relative;
-  padding-bottom: 56.25%;
-}
-
-.aspect-w-16 > * {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .feature-card {
@@ -360,6 +412,20 @@ onUnmounted(() => {
   .feature-description {
     font-size: 0.9rem;
   }
+  
+  .carousel-display {
+    min-height: 300px;
+  }
+  
+  .feature-icon-large {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .icon-large {
+    width: 50px;
+    height: 50px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -368,15 +434,23 @@ onUnmounted(() => {
   }
 }
 
-/* Performance optimizations - simplified */
-* {
-  box-sizing: border-box;
+/* Performance optimizations */
+.feature-card {
+  will-change: transform;
 }
 
-/* Disable unnecessary animations during scroll */
-@media (prefers-reduced-motion: no-preference) {
+.feature-card:hover {
+  will-change: auto;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
   .feature-card {
-    transition: transform 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+    transition: none;
+  }
+  
+  .fade-enter-active, .fade-leave-active {
+    transition: none;
   }
 }
 </style>

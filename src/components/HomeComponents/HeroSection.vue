@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { GraduationCap, Target, BookOpen, TrendingUp } from 'lucide-vue-next';
 
 // Props
 interface HeroSectionProps {
@@ -9,64 +10,34 @@ interface HeroSectionProps {
 const props = defineProps<HeroSectionProps>();
 
 // Main animation states
-const animationActive = ref<boolean>(false);
 const textVisible = ref<boolean>(false);
 
-// Japanese symbols for background
-interface Symbol {
-  id: number;
-  char: string;
-  size: number;
-  x: number;
-  y: number;
-  rotation: number;
-  color: string;
-}
+// Simplified Japanese symbols for background
+const symbols = [
+  { char: '日', x: 10, y: 20, size: 45, rotation: -10, color: '#DEC0F1' },
+  { char: '本', x: 85, y: 15, size: 40, rotation: 15, color: '#50C5B7' },
+  { char: '語', x: 15, y: 80, size: 50, rotation: 5, color: '#496DDB' },
+  { char: '学', x: 90, y: 75, size: 35, rotation: -15, color: '#EFD9CE' },
+  { char: '習', x: 50, y: 10, size: 38, rotation: 0, color: '#50C5B7' }
+];
 
-// Generate static symbols for background effect - Reduced count
-const generateSymbols = (): Symbol[] => {
-  const symbols = [];
-  const characters = ['日', '本', '語', '学', '習', '漢', '字', '話', '読', '見', '聞', '書', '言'];
-  
-  // Reduced from 20 to 10 for better performance
-  for (let i = 0; i < 10; i++) {
-    symbols.push({
-      id: i,
-      char: characters[Math.floor(Math.random() * characters.length)],
-      size: Math.random() * 40 + 40,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      rotation: Math.random() * 40 - 20,
-      color: [
-        '#DEC0F1', '#50C5B7', '#496DDB', '#EFD9CE', '#50C5B7'
-      ][Math.floor(Math.random() * 5)]
-    });
-  }
-  
-  return symbols;
-};
-
-const symbols = reactive<Symbol[]>(generateSymbols());
-
-// Central display characters with meaning
-const centerKanjis = reactive([
-  { char: '学', meaning: 'study', active: false, color: '#50C5B7', delay: 0.2 },
-  { char: '進', meaning: 'progress', active: false, color: '#496DDB', delay: 0.5 },
-  { char: '成', meaning: 'accomplish', active: false, color: '#DEC0F1', delay: 0.8 }
+// Simplified center kanjis
+const centerKanjis = ref([
+  { char: '学', meaning: 'study', active: false, color: '#50C5B7' },
+  { char: '進', meaning: 'progress', active: false, color: '#496DDB' },
+  { char: '成', meaning: 'accomplish', active: false, color: '#DEC0F1' }
 ]);
 
-// Initialize animations
+// Initialize animations - simplified
 onMounted(() => {
-  // Use requestAnimationFrame for better performance
   requestAnimationFrame(() => {
-    animationActive.value = true;
     textVisible.value = true;
     
-    // Animate center kanjis only
-    centerKanjis.forEach((kanji, index) => {
+    // Animate center kanjis with reduced delays
+    centerKanjis.value.forEach((kanji, index) => {
       setTimeout(() => {
         kanji.active = true;
-      }, 1000 + index * 800);
+      }, 800 + index * 400);
     });
   });
 });
@@ -74,19 +45,17 @@ onMounted(() => {
 
 <template>
   <section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden hero-background pt-20">
-    <!-- Static background elements - no animation -->
+    <!-- Static background elements - minimal -->
     <div class="absolute inset-0 overflow-hidden">
-      <div v-for="symbol in symbols" 
-           :key="symbol.id"
+      <div v-for="(symbol, index) in symbols" 
+           :key="index"
            class="absolute symbol-static"
            :style="{
              top: `${symbol.y}%`,
              left: `${symbol.x}%`,
              fontSize: `${symbol.size}px`,
              color: symbol.color,
-             transform: `rotate(${symbol.rotation}deg)`,
-             // Ajout de will-change pour optimiser le rendu
-             willChange: 'transform'
+             transform: `rotate(${symbol.rotation}deg)`
            }">
         {{ symbol.char }}
       </div>
@@ -111,14 +80,12 @@ onMounted(() => {
             </p>
             
             <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
-              <button class="primary-button shine-effect">
+              <button class="primary-button">
                 Start Learning Now
               </button>
               <button class="secondary-button">
+                <BookOpen class="w-5 h-5 mr-2" />
                 Explore Mojidex
-                <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5 play-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-                </svg>
               </button>
             </div>
           </div>
@@ -127,7 +94,7 @@ onMounted(() => {
         <!-- Right side - Visual elements -->
         <div class="lg:w-1/2 mt-12 lg:mt-0 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.2s;">
           <div class="relative display-container">
-            <!-- Static circle background - no pulse animation -->
+            <!-- Static circle background -->
             <div class="circle-background-static"></div>
             
             <!-- Main kanji display -->
@@ -137,8 +104,7 @@ onMounted(() => {
                    class="kanji-card"
                    :class="{ 'active': kanji.active }"
                    :style="{ 
-                     backgroundColor: kanji.color, 
-                     transitionDelay: `${kanji.delay}s`,
+                     backgroundColor: kanji.color,
                      zIndex: centerKanjis.length - index
                    }">
                 <div class="kanji-character">{{ kanji.char }}</div>
@@ -146,34 +112,42 @@ onMounted(() => {
               </div>
             </div>
             
-            <!-- Static Japanese text elements -->
-            <div class="decorative-text text-1" style="transform: translateY(-10px) rotate(2deg);">文法</div>
-            <div class="decorative-text text-2" style="transform: translateY(5px) rotate(-1deg);">単語</div>
-            <div class="decorative-text text-3" style="transform: translateY(-5px) rotate(1deg);">会話</div>
+            <!-- Static Japanese text elements - reduced -->
+            <div class="decorative-text text-1">文法</div>
+            <div class="decorative-text text-2">単語</div>
+            <div class="decorative-text text-3">会話</div>
           </div>
         </div>
       </div>
       
-      <!-- Features preview -->
+      <!-- Features preview - optimized -->
       <div class="features-preview slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.4s;">
         <div class="features-grid">
           <div class="feature-item">
-            <div class="feature-icon">🎓</div>
+            <div class="feature-icon-wrapper">
+              <GraduationCap class="feature-icon" />
+            </div>
             <div class="feature-title">All Levels</div>
             <div class="feature-desc">From beginner to pro</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">🎯</div>
+            <div class="feature-icon-wrapper">
+              <Target class="feature-icon" />
+            </div>
             <div class="feature-title">Gamified Learning</div>
             <div class="feature-desc">Fun interactive games</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">📖</div>
+            <div class="feature-icon-wrapper">
+              <BookOpen class="feature-icon" />
+            </div>
             <div class="feature-title">Mojidex</div>
             <div class="feature-desc">Your kanji companion</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">📊</div>
+            <div class="feature-icon-wrapper">
+              <TrendingUp class="feature-icon" />
+            </div>
             <div class="feature-title">Track Progress</div>
             <div class="feature-desc">Real-time analytics</div>
           </div>
@@ -184,23 +158,23 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Base colors - Nouvelle palette harmonieuse */
+/* Base colors */
 :root {
-  --color-cream: #EFD9CE;      /* Crème rosé */
-  --color-lavender: #DEC0F1;   /* Lavande */
-  --color-teal: #50C5B7;       /* Vert d'eau */
-  --color-blue: #496DDB;       /* Bleu vif */
-  --color-dark-green: #14342B; /* Vert foncé */
+  --color-cream: #EFD9CE;
+  --color-lavender: #DEC0F1;
+  --color-teal: #50C5B7;
+  --color-blue: #496DDB;
+  --color-dark-green: #14342B;
 }
 
-/* Hero section background avec eclairage statique */
+/* Hero section background - static only */
 .hero-background {
   background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-blue) 100%);
   position: relative;
   overflow: hidden;
 }
 
-/* Removed ambientLight animation for performance */
+/* Static ambient light - no animation */
 .hero-background::before {
   content: '';
   position: absolute;
@@ -216,14 +190,14 @@ onMounted(() => {
   z-index: 0;
 }
 
-/* Static symbols - no animation, reduced blur */
+/* Static symbols - optimized */
 .symbol-static {
-  opacity: 0.15;
+  opacity: 0.1;
   font-family: "Noto Sans JP", sans-serif;
-  filter: blur(0.5px);
+  font-weight: 600;
   user-select: none;
   z-index: 0;
-  text-shadow: 0 0 10px rgba(222, 192, 241, 0.2);
+  text-shadow: 0 0 8px rgba(222, 192, 241, 0.2);
 }
 
 /* Hero text styles */
@@ -262,7 +236,7 @@ onMounted(() => {
   max-width: 600px;
 }
 
-/* Button styles */
+/* Button styles - simplified */
 .primary-button {
   padding: 1rem 2rem;
   border-radius: 4px;
@@ -271,44 +245,16 @@ onMounted(() => {
   background: linear-gradient(135deg, var(--color-teal) 0%, #3da89b 100%);
   color: var(--color-dark-green);
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
   letter-spacing: 0.5px;
 }
 
 .primary-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(80, 197, 183, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(80, 197, 183, 0.4);
   filter: brightness(1.05);
 }
 
-/* Simplified shine effect - only on hover */
-.shine-effect:hover:before {
-  content: '';
-  position: absolute;
-  top: -100%;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
-  transform: rotate(25deg);
-  animation: shine 0.8s;
-}
-
-@keyframes shine {
-  to {
-    left: 200%;
-    top: 100%;
-  }
-}
-
-/* Secondary button */
 .secondary-button {
   padding: 1rem 2rem;
   border-radius: 4px;
@@ -327,19 +273,11 @@ onMounted(() => {
   background-color: rgba(222, 192, 241, 0.3);
   border-color: var(--color-teal);
   color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(73, 109, 219, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(73, 109, 219, 0.3);
 }
 
-.play-icon {
-  transition: transform 0.3s ease;
-}
-
-.secondary-button:hover .play-icon {
-  transform: scale(1.2);
-}
-
-/* Kanji display styles */
+/* Kanji display styles - optimized */
 .display-container {
   position: relative;
   width: 100%;
@@ -349,7 +287,6 @@ onMounted(() => {
   align-items: center;
 }
 
-/* Static circle background - no pulse animation */
 .circle-background-static {
   width: 400px;
   height: 400px;
@@ -389,13 +326,11 @@ onMounted(() => {
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
-  will-change: transform, opacity;
 }
 
 .kanji-card.active {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1) rotate(0);
-  will-change: auto;
 }
 
 .kanji-card:nth-child(1).active {
@@ -433,7 +368,6 @@ onMounted(() => {
   opacity: 0.2;
   font-weight: bold;
   color: var(--color-cream);
-  filter: blur(0.5px);
   text-shadow: 0 2px 10px rgba(80, 197, 183, 0.5);
 }
 
@@ -458,7 +392,7 @@ onMounted(() => {
   color: rgba(73, 109, 219, 0.8);
 }
 
-/* Features preview */
+/* Features preview - optimized */
 .features-preview {
   margin-top: 2.5rem;
   width: 100%;
@@ -474,24 +408,6 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .features-grid {
-    gap: 1rem;
-  }
-  
-  .feature-item {
-    min-width: calc(50% - 0.5rem);
-  }
-}
-
-@media (max-width: 400px) {
-  .feature-item {
-    min-width: 100%;
-  }
-}
-
-/* Optimized feature items */
 .feature-item {
   flex: 1;
   min-width: 180px;
@@ -504,7 +420,6 @@ onMounted(() => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   position: relative;
   margin-bottom: 5px;
-  will-change: transform;
 }
 
 .feature-item:nth-child(1) {
@@ -528,31 +443,27 @@ onMounted(() => {
 }
 
 .feature-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  will-change: auto;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
 }
 
-.feature-item:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-teal), var(--color-blue));
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.feature-item:hover:before {
-  opacity: 1;
+/* Icon wrapper for better styling */
+.feature-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .feature-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  width: 28px;
+  height: 28px;
+  color: var(--color-dark-green);
 }
 
 .feature-title {
@@ -573,14 +484,46 @@ onMounted(() => {
 /* Animation utilities - optimized */
 .slide-up-fade {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-  will-change: transform, opacity;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .element-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .features-grid {
+    gap: 1rem;
+  }
+  
+  .feature-item {
+    min-width: calc(50% - 0.5rem);
+  }
+}
+
+@media (max-width: 400px) {
+  .feature-item {
+    min-width: 100%;
+  }
+}
+
+/* Performance optimizations */
+.kanji-card {
+  will-change: transform, opacity;
+}
+
+.kanji-card.active {
+  will-change: auto;
+}
+
+.feature-item {
+  will-change: transform;
+}
+
+.feature-item:hover {
   will-change: auto;
 }
 </style>

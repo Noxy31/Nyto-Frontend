@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
+import { Brain, BookOpen, Gamepad2, TrendingUp, Zap, Award, Search, Users } from 'lucide-vue-next';
 import MojidexCardPreview from '@/components/MojidexComponents/MojidexCardPreview.vue';
 
 // Props
@@ -9,8 +10,7 @@ interface MojidexSectionProps {
 
 const props = defineProps<MojidexSectionProps>();
 
-// Animation states
-const animationActive = ref<boolean>(false);
+// Animation states - simplified
 const textVisible = ref<boolean>(false);
 const cardsVisible = ref<boolean>(false);
 
@@ -31,15 +31,15 @@ interface YokaiCard {
   quote?: string;
 }
 
-// Sample Yokai cards data with real images and quotes
-const yokaiCards = reactive<YokaiCard[]>([
+// Sample Yokai cards data - optimized with proper typing
+const yokaiCards: YokaiCard[] = [
   {
     id: 1,
-    type: 'kanji',
+    type: 'kanji' as const,
     name: 'The Rabbit Samurai',
     japanese: '侍',
     romaji: 'Samurai',
-    rarity: 'common',
+    rarity: 'common' as const,
     category: 'Warrior',
     unlocked: true,
     color: '#CC4A4A',
@@ -50,11 +50,11 @@ const yokaiCards = reactive<YokaiCard[]>([
   },
   {
     id: 2,
-    type: 'kanji',
+    type: 'kanji' as const,
     name: 'The Rabbit Samurai',
     japanese: '侍',
     romaji: 'Samurai',
-    rarity: 'rare',
+    rarity: 'rare' as const,
     category: 'Warrior',
     unlocked: true,
     color: '#2D5DB5',
@@ -65,11 +65,11 @@ const yokaiCards = reactive<YokaiCard[]>([
   },
   {
     id: 3,
-    type: 'kanji',
+    type: 'kanji' as const,
     name: 'The Rabbit Samurai',
     japanese: '侍',
     romaji: 'Samurai',
-    rarity: 'legendary',
+    rarity: 'legendary' as const,
     category: 'Warrior',
     unlocked: true,
     color: '#4B9A72',
@@ -80,11 +80,11 @@ const yokaiCards = reactive<YokaiCard[]>([
   },
   {
     id: 4,
-    type: 'kanji',
+    type: 'kanji' as const,
     name: 'The Rabbit Samurai',
     japanese: '侍',
     romaji: 'Samurai',
-    rarity: 'mythic',
+    rarity: 'mythic' as const,
     category: 'Warrior',
     unlocked: true,
     color: '#6B5D8F',
@@ -93,28 +93,38 @@ const yokaiCards = reactive<YokaiCard[]>([
     image: '/src/assets/Mojidex/Yokai/侍 - さむらい - The Rabbit Samourai - 4.png',
     quote: 'Transcending mortality, the Mythic Rabbit dances between worlds, its blade cutting reality itself.'
   }
-]);
+];
 
-// Rarity colors and effects
-const rarityConfig = {
-  common: { color: '#50C5B7', glow: 'rgba(80, 197, 183, 0.3)' },
-  rare: { color: '#496DDB', glow: 'rgba(73, 109, 219, 0.4)' },
-  legendary: { color: '#DEC0F1', glow: 'rgba(222, 192, 241, 0.5)' },
-  mythic: { color: '#FFD700', glow: 'rgba(255, 215, 0, 0.6)' }
+// Features icons mapping
+const featureIcons = {
+  collection: BookOpen,
+  rarity: Award,
+  information: Search,
+  progress: TrendingUp
 };
 
-// Current selected card for detail view
-const selectedCard = ref<YokaiCard | null>(null);
+// Benefits icons mapping
+const benefitIcons = {
+  memory: Brain,
+  story: BookOpen,
+  gamified: Gamepad2
+};
 
-// Initialize animations
+// Spirits icons
+const spiritIcons = {
+  yokai: Zap,
+  memory: Brain
+};
+
+// Initialize animations - optimized timing
 onMounted(() => {
   requestAnimationFrame(() => {
-    animationActive.value = true;
     textVisible.value = true;
     
+    // Reduced delay for better perceived performance
     setTimeout(() => {
       cardsVisible.value = true;
-    }, 500);
+    }, 300);
   });
 });
 </script>
@@ -141,9 +151,12 @@ onMounted(() => {
       <div class="mb-12 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.2s;">
         <div class="yokai-explanation-container">
           <div class="yokai-explanation-grid">
+            <!-- Yokai info section -->
             <div class="yokai-info-section">
               <div class="yokai-info-header">
-                <span class="yokai-icon">👺</span>
+                <div class="icon-wrapper">
+                  <component :is="spiritIcons.yokai" class="section-icon" />
+                </div>
                 <h3 class="yokai-title">The Spirit of Learning</h3>
               </div>
               <p class="yokai-description">
@@ -153,9 +166,12 @@ onMounted(() => {
               </p>
             </div>
             
+            <!-- Mojidex benefit section -->
             <div class="mojidex-benefit-section">
               <div class="mojidex-info-header">
-                <span class="mojidex-icon">🎴</span>
+                <div class="icon-wrapper">
+                  <component :is="spiritIcons.memory" class="section-icon" />
+                </div>
                 <h3 class="mojidex-title">Memory Through Stories</h3>
               </div>
               <p class="mojidex-description">
@@ -167,17 +183,24 @@ onMounted(() => {
             </div>
           </div>
           
+          <!-- Learning benefits -->
           <div class="learning-benefits">
             <div class="benefit-item">
-              <span class="benefit-icon">🧠</span>
+              <div class="benefit-icon-wrapper">
+                <component :is="benefitIcons.memory" class="benefit-icon" />
+              </div>
               <span class="benefit-text">Enhanced memory through visual association</span>
             </div>
             <div class="benefit-item">
-              <span class="benefit-icon">📚</span>
+              <div class="benefit-icon-wrapper">
+                <component :is="benefitIcons.story" class="benefit-icon" />
+              </div>
               <span class="benefit-text">Story-based learning for deeper understanding</span>
             </div>
             <div class="benefit-item">
-              <span class="benefit-icon">🎮</span>
+              <div class="benefit-icon-wrapper">
+                <component :is="benefitIcons.gamified" class="benefit-icon" />
+              </div>
               <span class="benefit-text">Gamified progression with collectible rewards</span>
             </div>
           </div>
@@ -201,17 +224,18 @@ onMounted(() => {
           :description="card.description"
           :image-url="card.image"
           :quote="card.quote"
-          @click="selectedCard = card"
         />
       </div>
 
       <!-- Features showcase -->
-      <div class="features-section mt-20 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.5s;">
+      <div class="features-section mt-20 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.4s;">
         <h3 class="features-title">What Makes Mojidex Special</h3>
         
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon">🎴</div>
+            <div class="feature-icon-large">
+              <component :is="featureIcons.collection" class="feature-icon" />
+            </div>
             <h4 class="feature-name">Yokai Collection</h4>
             <p class="feature-desc">
               Every kanji and word is represented by a unique Yokai spirit with detailed lore and personality.
@@ -219,7 +243,9 @@ onMounted(() => {
           </div>
           
           <div class="feature-card">
-            <div class="feature-icon">⚔️</div>
+            <div class="feature-icon-large">
+              <component :is="featureIcons.rarity" class="feature-icon" />
+            </div>
             <h4 class="feature-name">Rarity System</h4>
             <p class="feature-desc">
               From common spirits to mythic legends, discover rare Yokai as you progress in your learning journey.
@@ -227,7 +253,9 @@ onMounted(() => {
           </div>
           
           <div class="feature-card">
-            <div class="feature-icon">📚</div>
+            <div class="feature-icon-large">
+              <component :is="featureIcons.information" class="feature-icon" />
+            </div>
             <h4 class="feature-name">Complete Information</h4>
             <p class="feature-desc">
               Each card contains all forms, conjugations, and uses - your comprehensive reference companion.
@@ -235,7 +263,9 @@ onMounted(() => {
           </div>
           
           <div class="feature-card">
-            <div class="feature-icon">🎯</div>
+            <div class="feature-icon-large">
+              <component :is="featureIcons.progress" class="feature-icon" />
+            </div>
             <h4 class="feature-name">Gamified Progress</h4>
             <p class="feature-desc">
               Track your collection, complete sets, and unlock special rewards as you master the language.
@@ -245,7 +275,7 @@ onMounted(() => {
       </div>
 
       <!-- Call to action -->
-      <div class="cta-section text-center mt-16 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.6s;">
+      <div class="cta-section text-center mt-16 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.5s;">
         <h3 class="cta-title">Ready to Start Your Collection?</h3>
         <p class="cta-subtitle">Join thousands of learners discovering Japanese through the power of Yokai spirits.</p>
         
@@ -263,22 +293,22 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Color variables matching Hero section */
+/* Color variables */
 :root {
   --color-cream: #EFD9CE;
   --color-lavender: #DEC0F1;
   --color-teal: #50C5B7;
   --color-blue: #496DDB;
   --color-dark-green: #14342B;
-  --color-gold: #FFD700;
 }
 
-/* Background styling */
+/* Background styling - simplified */
 .mojidex-background {
   background: linear-gradient(135deg, var(--color-cream) 0%, rgba(222, 192, 241, 0.3) 50%, rgba(80, 197, 183, 0.2) 100%);
   position: relative;
 }
 
+/* Simplified ambient effect */
 .mojidex-background::before {
   content: '';
   position: absolute;
@@ -287,10 +317,10 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background: 
-    radial-gradient(circle at 20% 30%, rgba(80, 197, 183, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 60%, rgba(222, 192, 241, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 50% 90%, rgba(73, 109, 219, 0.1) 0%, transparent 60%);
-  opacity: 0.9;
+    radial-gradient(circle at 20% 30%, rgba(80, 197, 183, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 60%, rgba(222, 192, 241, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(73, 109, 219, 0.08) 0%, transparent 60%);
+  opacity: 0.8;
   z-index: 0;
 }
 
@@ -317,7 +347,6 @@ onMounted(() => {
   display: inline-block;
   position: relative;
   font-weight: 900;
-  text-shadow: none;
   filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
 }
 
@@ -328,40 +357,38 @@ onMounted(() => {
   opacity: 0.9;
 }
 
-/* Yokai explanation styling */
+/* Icon styling - consolidated */
+.icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, var(--color-teal), var(--color-blue));
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(80, 197, 183, 0.3);
+}
+
+.section-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-dark-green); /* Icônes en noir */
+}
+
+/* Yokai explanation styling - optimized */
 .yokai-explanation-container {
   background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.98) 0%, 
-    rgba(222, 192, 241, 0.15) 30%, 
-    rgba(80, 197, 183, 0.1) 70%, 
-    rgba(73, 109, 219, 0.08) 100%
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(222, 192, 241, 0.12) 30%, 
+    rgba(80, 197, 183, 0.08) 70%, 
+    rgba(73, 109, 219, 0.06) 100%
   );
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   border-radius: 25px;
   padding: 2.5rem;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  border: 2px solid rgba(222, 192, 241, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border: 2px solid rgba(222, 192, 241, 0.25);
   position: relative;
-  overflow: hidden;
-}
-
-.yokai-explanation-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    radial-gradient(circle at 30% 40%, rgba(80, 197, 183, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(222, 192, 241, 0.12) 0%, transparent 50%);
-  animation: pulse 8s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.1); opacity: 0.3; }
 }
 
 .yokai-explanation-grid {
@@ -376,12 +403,6 @@ onMounted(() => {
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
-}
-
-.yokai-icon, .mojidex-icon {
-  font-size: 2.5rem;
-  display: inline-block;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .yokai-title, .mojidex-title {
@@ -431,9 +452,20 @@ onMounted(() => {
   background: rgba(80, 197, 183, 0.15);
 }
 
+.benefit-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--color-teal), var(--color-blue));
+  border-radius: 50%;
+}
+
 .benefit-icon {
-  font-size: 1.5rem;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  width: 18px;
+  height: 18px;
+  color: var(--color-dark-green); /* Icônes en noir */
 }
 
 .benefit-text {
@@ -486,10 +518,22 @@ onMounted(() => {
   border-color: var(--color-teal);
 }
 
+.feature-icon-large {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--color-teal), var(--color-blue));
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 20px rgba(80, 197, 183, 0.3);
+}
+
 .feature-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  display: block;
+  width: 40px;
+  height: 40px;
+  color: var(--color-dark-green); /* Icônes en noir */
 }
 
 .feature-name {
@@ -512,7 +556,7 @@ onMounted(() => {
   padding: 3rem;
   background: linear-gradient(135deg, rgba(80, 197, 183, 0.1) 0%, rgba(222, 192, 241, 0.1) 100%);
   border-radius: 30px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 }
 
 .cta-title {
@@ -536,7 +580,7 @@ onMounted(() => {
   font-weight: 600;
   font-size: 1rem;
   background: linear-gradient(135deg, var(--color-teal) 0%, #3da89b 100%);
-  color: white;
+  color: var(--color-dark-green); /* Texte en noir */
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
 }
@@ -553,30 +597,29 @@ onMounted(() => {
   font-weight: 600;
   font-size: 1rem;
   border: 2px solid var(--color-blue);
-  color: var(--color-blue);
+  color: var(--color-dark-green); /* Texte en noir */
   background-color: transparent;
   transition: all 0.3s ease;
 }
 
 .secondary-button:hover {
-  background-color: var(--color-blue);
+  background-color: var(--color-dark-green); /* Fond s'assombrit */
   color: white;
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(73, 109, 219, 0.3);
+  box-shadow: 0 8px 20px rgba(20, 52, 43, 0.3);
+  border-color: var(--color-dark-green);
 }
 
-/* Animation utilities */
+/* Animation utilities - optimized */
 .slide-up-fade {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-  will-change: transform, opacity;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .element-visible {
   opacity: 1;
   transform: translateY(0);
-  will-change: auto;
 }
 
 /* Responsive adjustments */
@@ -611,6 +654,35 @@ onMounted(() => {
   
   .features-title, .cta-title {
     font-size: 2rem;
+  }
+}
+
+/* Performance optimizations */
+.feature-card {
+  will-change: transform;
+}
+
+.feature-card:hover {
+  will-change: auto;
+}
+
+.benefit-item {
+  will-change: transform;
+}
+
+.benefit-item:hover {
+  will-change: auto;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .slide-up-fade {
+    transition: none;
+  }
+  
+  .feature-card,
+  .benefit-item {
+    transition: none;
   }
 }
 </style>

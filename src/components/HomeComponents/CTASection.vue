@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { Sparkles, Smartphone, Play } from 'lucide-vue-next';
 
 // Props
 interface CTASectionProps {
@@ -22,26 +23,27 @@ interface FloatingElement {
 // App badge interface
 interface AppBadge {
   name: string;
-  icon: string;
+  icon: any;
   text: string;
   store: string;
 }
 
-// Floating elements for background animation
+// Optimized floating elements - reduced count
 const floatingElements = ref<FloatingElement[]>([]);
 
-// Generate random floating elements for the background
+// Generate floating elements - optimized
 const generateFloatingElements = (): void => {
   const elements: FloatingElement[] = [];
   
-  for (let i = 0; i < 6; i++) {
+  // Reduced count for better performance
+  for (let i = 0; i < 4; i++) {
     elements.push({
       id: i,
-      size: Math.random() * 60 + 40,
+      size: Math.random() * 40 + 25, // Smaller sizes
       x: Math.random() * 100,
       y: Math.random() * 100,
-      duration: Math.random() * 15 + 20,
-      delay: Math.random() * 5,
+      duration: Math.random() * 8 + 12, // Shorter animations
+      delay: Math.random() * 2,
       type: i % 2 === 0 ? 'circle' : 'square'
     });
   }
@@ -49,22 +51,18 @@ const generateFloatingElements = (): void => {
   floatingElements.value = elements;
 };
 
-// App store badges data - CORRECTED WITH ORIGINAL APPLE ICON
+// App store badges data with Lucide icons
 const appStoreBadges = ref<AppBadge[]>([
   {
     name: 'App Store',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.52 1.49-1.14 2.95-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-    </svg>`,
+    icon: Smartphone,
     text: 'Download on the',
     store: 'App Store'
   },
   {
     name: 'Google Play',
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.61 3 21.09 3 20.5ZM16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12ZM20.16 10.81C20.5 11.08 20.75 11.5 20.75 12C20.75 12.5 20.5 12.92 20.16 13.19L17.89 14.5L15.39 12L17.89 9.5L20.16 10.81ZM6.05 2.66L16.81 8.88L14.54 11.15L6.05 2.66Z"/>
-    </svg>`,
-    text: 'Download on the',
+    icon: Play,
+    text: 'Get it on',
     store: 'Google Play'
   }
 ]);
@@ -74,31 +72,33 @@ onMounted(() => {
   generateFloatingElements();
 });
 
-// Hover states for buttons
-const primaryHover = ref<boolean>(false);
-const secondaryHover = ref<boolean>(false);
-const badgeHover = ref<number | null>(null);
+// Simplified hover states
+const buttonHover = ref<{
+  primary: boolean;
+  secondary: boolean;
+  badge: number | null;
+}>({
+  primary: false,
+  secondary: false,
+  badge: null
+});
 
-const setPrimaryHover = (value: boolean): void => {
-  primaryHover.value = value;
-};
-
-const setSecondaryHover = (value: boolean): void => {
-  secondaryHover.value = value;
+const setButtonHover = (type: 'primary' | 'secondary', value: boolean): void => {
+  buttonHover.value[type] = value;
 };
 
 const setBadgeHover = (index: number | null): void => {
-  badgeHover.value = index;
+  buttonHover.value.badge = index;
 };
 </script>
 
 <template>
   <section id="action" class="pb-0 pt-24 relative overflow-hidden cta-section">
-    <!-- Modern animated background elements -->
+    <!-- Optimized animated background elements -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
       <div v-for="element in floatingElements" 
            :key="element.id"
-           class="absolute opacity-10 animate-float floating-element"
+           class="absolute opacity-8 animate-float floating-element"
            :class="element.type"
            :style="{
              width: `${element.size}px`,
@@ -113,88 +113,93 @@ const setBadgeHover = (index: number | null): void => {
   
     <div class="container mx-auto px-6 md:px-12 relative z-10">
       <div class="max-w-4xl mx-auto text-center">
-        <!-- Limited time offer tag -->
-        <div class="inline-block mb-6 px-6 py-2 rounded-full text-sm uppercase tracking-wider font-medium transition-all duration-1000 transform offer-tag"
+        <!-- Limited time offer tag with icon -->
+        <div class="inline-flex items-center gap-2 mb-6 px-6 py-2 rounded-full text-sm uppercase tracking-wider font-medium transition-all duration-600 transform offer-tag"
              :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'">
+          <Sparkles class="w-4 h-4" />
           Limited Time Offer
         </div>
         
         <!-- Main heading -->
-        <h2 class="text-4xl md:text-6xl font-extrabold mb-8 transition-all duration-1000 transform text-white"
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-8 transition-all duration-600 transform text-white"
             :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
             style="transition-delay: 0.1s; line-height: 1.1;">
           Start Your <span class="gradient-text">Japanese Adventure</span>
         </h2>
         
         <!-- Description text -->
-        <p class="text-xl md:text-2xl mb-12 transition-all duration-1000 transform text-white opacity-90"
+        <p class="text-xl md:text-2xl mb-12 transition-all duration-600 transform text-white opacity-90"
            :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
            style="transition-delay: 0.2s;">
           Get full access to all features for 3 days free, then decide if Nyto is right for you.
         </p>
         
         <!-- Action buttons -->
-        <div class="flex flex-col sm:flex-row justify-center gap-4 transition-all duration-1000 transform"
+        <div class="flex flex-col sm:flex-row justify-center gap-4 transition-all duration-600 transform"
              :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
              style="transition-delay: 0.3s;">
           <!-- Primary CTA button -->
           <button class="primary-button"
-                  :class="{ 'scale-105': primaryHover }"
-                  @mouseenter="setPrimaryHover(true)"
-                  @mouseleave="setPrimaryHover(false)">
+                  :class="{ 'scale-105': buttonHover.primary }"
+                  @mouseenter="setButtonHover('primary', true)"
+                  @mouseleave="setButtonHover('primary', false)">
             Start Free Trial
           </button>
           
           <!-- Secondary CTA button -->
           <button class="secondary-button"
-                  :class="{ 'scale-105': secondaryHover }"
-                  @mouseenter="setSecondaryHover(true)"
-                  @mouseleave="setSecondaryHover(false)">
+                  :class="{ 'scale-105': buttonHover.secondary }"
+                  @mouseenter="setButtonHover('secondary', true)"
+                  @mouseleave="setButtonHover('secondary', false)">
             See Pricing
           </button>
         </div>
         
         <!-- Disclaimer text -->
-        <p class="mt-8 transition-all duration-1000 transform text-white opacity-70 text-sm"
+        <p class="mt-8 transition-all duration-600 transform text-white opacity-70 text-sm"
            :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
            style="transition-delay: 0.4s;">
           No credit card required. Cancel anytime.
         </p>
       </div>
       
-      <!-- App Store badges - Coming Soon -->
-      <div class="mt-16 mb-24 flex flex-col sm:flex-row justify-center items-center gap-4 transition-all duration-1000 transform"
+      <!-- App Store badges -->
+      <div class="mt-16 mb-24 flex flex-col sm:flex-row justify-center items-center gap-4 transition-all duration-600 transform"
            :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
            style="transition-delay: 0.5s;">
         
         <div v-for="(badge, index) in appStoreBadges"
              :key="badge.name"
-             class="app-store-badge relative"
-             :class="{ 'scale-105': badgeHover === index }"
+             class="app-store-badge relative cursor-not-allowed"
+             :class="{ 'scale-105': buttonHover.badge === index }"
              @mouseenter="setBadgeHover(index)"
              @mouseleave="setBadgeHover(null)">
-          <div class="flex items-center space-x-2">
-            <div class="text-3xl" v-html="badge.icon"></div>
+          <div class="flex items-center space-x-3">
+            <div class="badge-icon-wrapper">
+              <component :is="badge.icon" class="badge-icon" />
+            </div>
             <div class="text-left">
-              <div class="text-xs">{{ badge.text }}</div>
+              <div class="text-xs opacity-80">{{ badge.text }}</div>
               <div class="text-xl font-medium">{{ badge.store }}</div>
             </div>
           </div>
           <div class="coming-soon-overlay">
+            <Sparkles class="w-5 h-5 mr-2" />
             Coming Soon
           </div>
         </div>
       </div>
     </div>
     
-    <!-- Animated wave at the bottom -->
+    <!-- Enhanced animated wave -->
     <div class="wave-container">
       <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="wave">
         <defs>
           <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" style="stop-color:#EFD9CE;stop-opacity:1" />
-            <stop offset="33%" style="stop-color:#DEC0F1;stop-opacity:1" />
-            <stop offset="66%" style="stop-color:#50C5B7;stop-opacity:1" />
+            <stop offset="25%" style="stop-color:#DEC0F1;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#50C5B7;stop-opacity:1" />
+            <stop offset="75%" style="stop-color:#496DDB;stop-opacity:1" />
             <stop offset="100%" style="stop-color:#EFD9CE;stop-opacity:1" />
           </linearGradient>
         </defs>
@@ -205,7 +210,7 @@ const setBadgeHover = (index: number | null): void => {
             values="M0,96L40,112C80,128,160,160,240,160C320,160,400,128,480,122.7C560,117,640,139,720,133.3C800,128,880,96,960,90.7C1040,85,1120,107,1200,117.3C1280,128,1360,128,1400,128L1440,128L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z;
                    M0,128L40,122.7C80,117,160,107,240,101.3C320,96,400,96,480,112C560,128,640,160,720,170.7C800,181,880,171,960,149.3C1040,128,1120,96,1200,96C1280,96,1360,128,1400,144L1440,160L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z;
                    M0,96L40,112C80,128,160,160,240,160C320,160,400,128,480,122.7C560,117,640,139,720,133.3C800,128,880,96,960,90.7C1040,85,1120,107,1200,117.3C1280,128,1360,128,1400,128L1440,128L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
-            dur="10s"
+            dur="8s"
             repeatCount="indefinite" />
         </path>
       </svg>
@@ -236,13 +241,13 @@ const setBadgeHover = (index: number | null): void => {
   position: relative;
 }
 
-/* Modern floating animation */
+/* Optimized floating animation */
 @keyframes float {
   0%, 100% {
     transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: translateY(-20px) rotate(180deg);
+    transform: translateY(-15px) rotate(180deg);
   }
 }
 
@@ -251,9 +256,9 @@ const setBadgeHover = (index: number | null): void => {
 }
 
 .floating-element {
-  background: linear-gradient(45deg, rgba(80, 197, 183, 0.3), rgba(222, 192, 241, 0.3));
-  border-radius: 10px;
-  filter: blur(1px);
+  background: linear-gradient(45deg, rgba(80, 197, 183, 0.2), rgba(222, 192, 241, 0.2));
+  border-radius: 8px;
+  filter: blur(0.5px);
 }
 
 .floating-element.circle {
@@ -275,11 +280,12 @@ const setBadgeHover = (index: number | null): void => {
   font-weight: 900;
 }
 
-/* Offer tag */
+/* Offer tag - WHITE TEXT */
 .offer-tag {
   background-color: rgba(80, 197, 183, 0.15);
-  color: var(--color-teal);
+  color: white; /* Texte en blanc */
   border: 1px solid rgba(80, 197, 183, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 /* Buttons */
@@ -333,9 +339,20 @@ const setBadgeHover = (index: number | null): void => {
   opacity: 0.6;
 }
 
-.app-store-badge svg {
+.badge-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.badge-icon {
   width: 24px;
   height: 24px;
+  color: white;
 }
 
 .coming-soon-overlay {
@@ -359,7 +376,7 @@ const setBadgeHover = (index: number | null): void => {
   opacity: 1;
 }
 
-/* Wave animation - FIXED */
+/* Wave animation */
 .wave-container {
   position: relative;
   bottom: 0;
@@ -373,7 +390,7 @@ const setBadgeHover = (index: number | null): void => {
 .wave {
   position: relative;
   width: 100%;
-  height: 120px;
+  height: 100px;
   transform: translateZ(0);
 }
 
@@ -405,13 +422,28 @@ const setBadgeHover = (index: number | null): void => {
   transform: translateZ(0);
 }
 
+.primary-button,
+.secondary-button {
+  will-change: transform;
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  will-change: auto;
+}
+
+/* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   .floating-element {
     animation: none;
   }
   
   .animate-float {
-    animation-duration: 30s;
+    animation-duration: 20s;
+  }
+  
+  .wave path animate {
+    animation-duration: 15s;
   }
 }
 </style>
