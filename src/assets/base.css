@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+/* Scroll fluide sans forcer le GPU */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  -webkit-overflow-scrolling: touch; /* Seulement pour mobile */
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+}
+
+/* GPU seulement quand nécessaire */
+.animate-float {
+  will-change: transform;
+}
+
+.slide-up-fade {
+  will-change: transform, opacity;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.element-visible {
+  will-change: auto; /* Important : on remet à auto */
+}
+
+/* Optimisation mobile uniquement */
+@media (max-width: 768px) {
+  body {
+    overscroll-behavior-y: none; /* Pas de bounce sur mobile */
+  }
+}
