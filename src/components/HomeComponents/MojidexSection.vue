@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { Brain, BookOpen, Gamepad2, TrendingUp, Zap, Award, Search, Users } from 'lucide-vue-next';
 import MojidexCardPreview from '@/components/MojidexComponents/MojidexCardPreview.vue';
+import KanjiCardDetails from '@/components/MojidexComponents/KanjiCardDetails.vue';
 
 // Props
 interface MojidexSectionProps {
@@ -10,9 +11,11 @@ interface MojidexSectionProps {
 
 const props = defineProps<MojidexSectionProps>();
 
-// Animation states - simplified
+// Animation states
 const textVisible = ref<boolean>(false);
 const cardsVisible = ref<boolean>(false);
+const selectedCardId = ref<number | null>(null);
+const showCardDetails = ref<boolean>(false);
 
 // Yokai card types
 interface YokaiCard {
@@ -29,9 +32,21 @@ interface YokaiCard {
   level?: number;
   description?: string;
   quote?: string;
+  kunyomi?: string;
+  onyomi?: string;
+  meaning?: string;
+  radical?: string;
+  isJoyo?: boolean;
+  compounds?: Array<{
+    kanji: string;
+    reading: string;
+    meaning: string;
+    explanation?: string;
+    kanjiBreakdown?: string;
+  }>;
 }
 
-// Sample Yokai cards data - optimized with proper typing
+// Sample Yokai cards data with compound information
 const yokaiCards: YokaiCard[] = [
   {
     id: 1,
@@ -46,7 +61,27 @@ const yokaiCards: YokaiCard[] = [
     level: 1,
     description: 'A noble rabbit warrior',
     image: '/src/assets/Mojidex/Yokai/侍 - さむらい - The Rabbit Samourai - 1.png',
-    quote: 'A humble bunny begins its warrior journey.'
+    quote: 'A humble bunny begins its warrior journey.',
+    kunyomi: 'さむらい',
+    onyomi: 'ジ、シ',
+    meaning: 'Samurai, warrior, attendant',
+    radical: '亻 (person)',
+    isJoyo: false,
+    compounds: [
+      {
+        kanji: '侍女（じじょ）',
+        reading: 'Jijo',
+        meaning: 'Maid, lady-in-waiting',
+        kanjiBreakdown: '侍 (to serve) + 女 (woman)'
+      },
+      {
+        kanji: '武士（ぶし）',
+        reading: 'Bushi',
+        meaning: 'Warrior, samurai',
+        explanation: 'This term is more commonly used than 侍 to refer to the samurai class.',
+        kanjiBreakdown: '武 (war) + 士 (man, warrior)'
+      }
+    ]
   },
   {
     id: 2,
@@ -61,7 +96,27 @@ const yokaiCards: YokaiCard[] = [
     level: 3,
     description: 'A skilled rabbit warrior',
     image: '/src/assets/Mojidex/Yokai/侍 - さむらい - The Rabbit Samourai - 2.png',
-    quote: "Through discipline, the rabbit's blade grows sharper, its spirit unbreakable."
+    quote: "Through discipline, the rabbit's blade grows sharper, its spirit unbreakable.",
+    kunyomi: 'さむらい',
+    onyomi: 'ジ、シ',
+    meaning: 'Samurai, warrior, attendant',
+    radical: '亻 (person)',
+    isJoyo: false,
+    compounds: [
+      {
+        kanji: '侍女（じじょ）',
+        reading: 'Jijo',
+        meaning: 'Maid, lady-in-waiting',
+        kanjiBreakdown: '侍 (to serve) + 女 (woman)'
+      },
+      {
+        kanji: '武士（ぶし）',
+        reading: 'Bushi',
+        meaning: 'Warrior, samurai',
+        explanation: 'This term is more commonly used than 侍 to refer to the samurai class.',
+        kanjiBreakdown: '武 (war) + 士 (man, warrior)'
+      }
+    ]
   },
   {
     id: 3,
@@ -76,7 +131,27 @@ const yokaiCards: YokaiCard[] = [
     level: 7,
     description: 'A legendary rabbit warrior',
     image: '/src/assets/Mojidex/Yokai/侍 - さむらい - The Rabbit Samourai - 3.png',
-    quote: 'The legendary rabbit whose hop splits mountains, whose honor outshines the harvest moon.'
+    quote: 'The legendary rabbit whose hop splits mountains, whose honor outshines the harvest moon.',
+    kunyomi: 'さむらい',
+    onyomi: 'ジ、シ',
+    meaning: 'Samurai, warrior, attendant',
+    radical: '亻 (person)',
+    isJoyo: false,
+    compounds: [
+      {
+        kanji: '侍女（じじょ）',
+        reading: 'Jijo',
+        meaning: 'Maid, lady-in-waiting',
+        kanjiBreakdown: '侍 (to serve) + 女 (woman)'
+      },
+      {
+        kanji: '武士（ぶし）',
+        reading: 'Bushi',
+        meaning: 'Warrior, samurai',
+        explanation: 'This term is more commonly used than 侍 to refer to the samurai class.',
+        kanjiBreakdown: '武 (war) + 士 (man, warrior)'
+      }
+    ]
   },
   {
     id: 4,
@@ -91,7 +166,27 @@ const yokaiCards: YokaiCard[] = [
     level: 10,
     description: 'The ultimate rabbit warrior',
     image: '/src/assets/Mojidex/Yokai/侍 - さむらい - The Rabbit Samourai - 4.png',
-    quote: 'Transcending mortality, the Mythic Rabbit dances between worlds, its blade cutting reality itself.'
+    quote: 'Transcending mortality, the Mythic Rabbit dances between worlds, its blade cutting reality itself.',
+    kunyomi: 'さむらい',
+    onyomi: 'ジ、シ',
+    meaning: 'Samurai, warrior, attendant',
+    radical: '亻 (person)',
+    isJoyo: false,
+    compounds: [
+      {
+        kanji: '侍女（じじょ）',
+        reading: 'Jijo',
+        meaning: 'Maid, lady-in-waiting',
+        kanjiBreakdown: '侍 (to serve) + 女 (woman)'
+      },
+      {
+        kanji: '武士（ぶし）',
+        reading: 'Bushi',
+        meaning: 'Warrior, samurai',
+        explanation: 'This term is more commonly used than 侍 to refer to the samurai class. While 侍 and 武士 can both refer to samurai, 侍 is more often used for the individual figure, whereas 武士 refers to the broader, institutional class.',
+        kanjiBreakdown: '武 (war) + 士 (man, warrior)'
+      }
+    ]
   }
 ];
 
@@ -116,12 +211,33 @@ const spiritIcons = {
   memory: Brain
 };
 
-// Initialize animations - optimized timing
+// Handle card click
+const handleCardClick = (card: YokaiCard) => {
+  selectedCardId.value = card.id;
+  showCardDetails.value = true;
+  // Lock body scroll
+  document.body.style.overflow = 'hidden';
+};
+
+// Handle details close
+const handleDetailsClose = () => {
+  showCardDetails.value = false;
+  selectedCardId.value = null;
+  // Unlock body scroll
+  document.body.style.overflow = '';
+};
+
+// Get selected card
+const selectedCard = computed(() => {
+  if (!selectedCardId.value) return null;
+  return yokaiCards.find(card => card.id === selectedCardId.value) || null;
+});
+
+// Initialize animations
 onMounted(() => {
   requestAnimationFrame(() => {
     textVisible.value = true;
     
-    // Reduced delay for better perceived performance
     setTimeout(() => {
       cardsVisible.value = true;
     }, 300);
@@ -208,23 +324,31 @@ onMounted(() => {
       </div>
 
       <!-- Yokai cards grid -->
-      <div class="cards-grid slide-up-fade" :class="{ 'element-visible': cardsVisible }">
-        <MojidexCardPreview
-          v-for="card in yokaiCards"
-          :key="card.id"
-          :type="card.type"
-          :name="card.name"
-          :japanese="card.japanese"
-          :romaji="card.romaji"
-          :rarity="card.rarity"
-          :category="card.category"
-          :unlocked="card.unlocked"
-          :color="card.color"
-          :level="card.level"
-          :description="card.description"
-          :image-url="card.image"
-          :quote="card.quote"
-        />
+      <div class="cards-container-wrapper">
+        <div class="cards-grid slide-up-fade" :class="{ 'element-visible': cardsVisible }">
+          <div 
+            v-for="card in yokaiCards"
+            :key="card.id"
+            :data-card-id="card.id"
+            class="card-wrapper"
+            @click="handleCardClick(card)"
+          >
+            <MojidexCardPreview
+              :type="card.type"
+              :name="card.name"
+              :japanese="card.japanese"
+              :romaji="card.romaji"
+              :rarity="card.rarity"
+              :category="card.category"
+              :unlocked="card.unlocked"
+              :color="card.color"
+              :level="card.level"
+              :description="card.description"
+              :image-url="card.image"
+              :quote="card.quote"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- Features showcase -->
@@ -289,6 +413,14 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Modal for card details -->
+    <KanjiCardDetails 
+      v-if="selectedCard && showCardDetails"
+      :kanji="selectedCard"
+      :is-visible="showCardDetails"
+      @close="handleDetailsClose"
+    />
   </section>
 </template>
 
@@ -372,7 +504,7 @@ onMounted(() => {
 .section-icon {
   width: 24px;
   height: 24px;
-  color: var(--color-dark-green); /* Icônes en noir */
+  color: var(--color-dark-green);
 }
 
 /* Yokai explanation styling - optimized */
@@ -465,7 +597,7 @@ onMounted(() => {
 .benefit-icon {
   width: 18px;
   height: 18px;
-  color: var(--color-dark-green); /* Icônes en noir */
+  color: var(--color-dark-green);
 }
 
 .benefit-text {
@@ -474,12 +606,28 @@ onMounted(() => {
   font-weight: 500;
 }
 
+/* Cards container wrapper */
+.cards-container-wrapper {
+  position: relative;
+  min-height: 400px;
+}
+
 /* Yokai cards grid */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
+}
+
+.card-wrapper {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.card-wrapper:hover {
+  transform: translateY(-10px) scale(1.05);
 }
 
 /* Features section */
@@ -533,7 +681,7 @@ onMounted(() => {
 .feature-icon {
   width: 40px;
   height: 40px;
-  color: var(--color-dark-green); /* Icônes en noir */
+  color: var(--color-dark-green);
 }
 
 .feature-name {
@@ -580,7 +728,7 @@ onMounted(() => {
   font-weight: 600;
   font-size: 1rem;
   background: linear-gradient(135deg, var(--color-teal) 0%, #3da89b 100%);
-  color: var(--color-dark-green); /* Texte en noir */
+  color: var(--color-dark-green);
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
 }
@@ -597,13 +745,13 @@ onMounted(() => {
   font-weight: 600;
   font-size: 1rem;
   border: 2px solid var(--color-blue);
-  color: var(--color-dark-green); /* Texte en noir */
+  color: var(--color-dark-green);
   background-color: transparent;
   transition: all 0.3s ease;
 }
 
 .secondary-button:hover {
-  background-color: var(--color-dark-green); /* Fond s'assombrit */
+  background-color: var(--color-dark-green);
   color: white;
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(20, 52, 43, 0.3);
@@ -655,6 +803,11 @@ onMounted(() => {
   .features-title, .cta-title {
     font-size: 2rem;
   }
+  
+  .cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
 }
 
 /* Performance optimizations */
@@ -674,6 +827,10 @@ onMounted(() => {
   will-change: auto;
 }
 
+.card-wrapper {
+  will-change: transform, opacity;
+}
+
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   .slide-up-fade {
@@ -681,7 +838,8 @@ onMounted(() => {
   }
   
   .feature-card,
-  .benefit-item {
+  .benefit-item,
+  .card-wrapper {
     transition: none;
   }
 }
