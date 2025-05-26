@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { X, Sparkles, BookOpen } from 'lucide-vue-next';
+import HexagonPattern from './HexagonPattern.vue';
 
 // Props interface
 interface KanjiDetail {
@@ -69,6 +70,19 @@ const cardStyle = computed(() => ({
   background: rarityConfig[props.kanji.rarity].bgGradient,
   '--rarity-color': rarityConfig[props.kanji.rarity].color
 }));
+
+// Interface pour la configuration des hexagones
+interface HexagonConfig {
+  position: 'center' | 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  delay: number;
+  colorVariant?: 'gold' | 'orange' | 'red' | 'purple';
+}
+
+// Configuration des hexagones par rareté - UN SEUL hexagone au centre
+const hexagonConfig = computed((): HexagonConfig[] => {
+  // Toutes les raretés ont UN SEUL hexagone au centre
+  return [{ position: 'center', delay: 0 }];
+});
 
 // Animation sequence
 onMounted(() => {
@@ -139,79 +153,19 @@ const handleClose = () => {
       >
         <!-- FRONT FACE -->
         <div 
-          class="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl card-background"
-          :class="kanji.rarity"
+          class="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl"
           style="backface-visibility: hidden; transform: rotateY(0deg);"
         >
-          <!-- Motif hexagonal en fond -->
-          <div class="hex-pattern" :class="kanji.rarity">
-            <div class="hex-socket">
-              <div class="hex-gel center-gel">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c1 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c2 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c3 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c4 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c5 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c6 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c7 r2">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c8 r2">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c9 r2">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c10 r2">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c11 r2">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c12 r2">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-            </div>
+          <!-- Hexagonal Pattern Background -->
+          <div class="hex-container">
+            <HexagonPattern
+              v-for="(config, index) in hexagonConfig"
+              :key="`front-${index}`"
+              :rarity="kanji.rarity"
+              :position="config.position"
+              :animation-delay="config.delay"
+              :color-variant="config.colorVariant"
+            />
           </div>
 
           <div class="w-full h-full rounded-3xl p-4 relative overflow-hidden flex flex-col card-inner" :style="cardStyle">
@@ -267,49 +221,19 @@ const handleClose = () => {
 
         <!-- BACK FACE -->
         <div 
-          class="absolute inset-0 rounded-3xl overflow-hidden p-6 shadow-2xl card-background"
-          :class="kanji.rarity"
+          class="absolute inset-0 rounded-3xl overflow-hidden p-6 shadow-2xl"
           :style="{ ...cardStyle, backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }"
         >
-          <!-- Motif hexagonal en fond -->
-          <div class="hex-pattern" :class="kanji.rarity">
-            <div class="hex-socket">
-              <div class="hex-gel center-gel">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c1 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c2 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c3 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c4 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c5 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-              <div class="hex-gel c6 r1">
-                <div class="hex-brick h1"></div>
-                <div class="hex-brick h2"></div>
-                <div class="hex-brick h3"></div>
-              </div>
-            </div>
+          <!-- Hexagonal Pattern Background -->
+          <div class="hex-container">
+            <HexagonPattern
+              v-for="(config, index) in hexagonConfig"
+              :key="`back-${index}`"
+              :rarity="kanji.rarity"
+              :position="config.position"
+              :animation-delay="config.delay"
+              :color-variant="config.colorVariant"
+            />
           </div>
 
           <div 
@@ -492,136 +416,12 @@ const handleClose = () => {
   border-image: linear-gradient(45deg, #FFD700, #FFA500, #FF6347, #FFD700) 1;
 }
 
-/* VRAIS MOTIFS HEXAGONAUX INTÉGRÉS */
-.hex-pattern {
+/* Container pour les hexagones */
+.hex-container {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.15;
-}
-
-.hex-socket {
-  width: 200px;
-  height: 200px;
-  position: absolute;
-  left: 50%;
-  margin-left: -100px;
-  top: 50%;
-  margin-top: -100px;
-}
-
-.hex-brick {
-  width: 30px;
-  height: 17px;
-  position: absolute;
-  top: 5px;
-  animation-name: hexFade;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-}
-
-.h2 {
-  transform: rotate(60deg);
-}
-
-.h3 {
-  transform: rotate(-60deg);
-}
-
-.hex-gel {
-  height: 30px;
-  width: 30px;
-  transition: all 0.3s;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-}
-
-.center-gel {
-  margin-left: -15px;
-  margin-top: -15px;
-  animation-name: hexPulse;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-}
-
-.c1 { margin-left: -47px; margin-top: -15px; }
-.c2 { margin-left: -31px; margin-top: -43px; }
-.c3 { margin-left: 1px; margin-top: -43px; }
-.c4 { margin-left: 17px; margin-top: -15px; }
-.c5 { margin-left: -31px; margin-top: 13px; }
-.c6 { margin-left: 1px; margin-top: 13px; }
-.c7 { margin-left: -63px; margin-top: -43px; }
-.c8 { margin-left: 33px; margin-top: -43px; }
-.c9 { margin-left: -15px; margin-top: 41px; }
-.c10 { margin-left: -63px; margin-top: 13px; }
-.c11 { margin-left: 33px; margin-top: 13px; }
-.c12 { margin-left: -15px; margin-top: -71px; }
-
-.r1 {
-  animation-name: hexPulse;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-  animation-delay: 0.2s;
-}
-
-.r2 {
-  animation-name: hexPulse;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-  animation-delay: 0.4s;
-}
-
-.r1 > .hex-brick {
-  animation-name: hexFade;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-  animation-delay: 0.2s;
-}
-
-.r2 > .hex-brick {
-  animation-name: hexFade;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-  animation-delay: 0.4s;
-}
-
-/* Couleurs par rareté */
-.common .hex-brick {
-  background: #50C5B7;
-}
-
-.rare .hex-brick {
-  background: #496DDB;
-}
-
-.legendary .hex-brick {
-  background: #DEC0F1;
-}
-
-.mythic .hex-brick {
-  background: #FFD700;
-}
-
-/* Animations hexagonales */
-@keyframes hexPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.8); }
-  100% { transform: scale(1); }
-}
-
-@keyframes hexFade {
-  0% { opacity: 0.3; }
-  50% { opacity: 1; }
-  100% { opacity: 0.3; }
-}
-
-@keyframes mythicShine {
-  0%, 100% { opacity: 0.18; transform: translateX(0); }
-  25% { opacity: 0.22; transform: translateX(1px); }
-  50% { opacity: 0.2; transform: translateX(-1px); }
-  75% { opacity: 0.21; transform: translateX(0.5px); }
 }
 
 /* Font japonaise */
