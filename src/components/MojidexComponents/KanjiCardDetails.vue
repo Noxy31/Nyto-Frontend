@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
-import { X, Sparkles, BookOpen, Zap } from 'lucide-vue-next';
+import { X, Sparkles, BookOpen } from 'lucide-vue-next';
 
 // Props interface
 interface KanjiDetail {
@@ -45,52 +45,30 @@ const emit = defineEmits<{
 const isFlipped = ref(false);
 const contentVisible = ref(false);
 
-// Rarity configuration with enhanced styling
+// Rarity configuration
 const rarityConfig = {
   common: { 
     color: '#50C5B7',
-    accent: '#3da89b',
-    borderColor: '#50C5B7',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8fdfc 30%, #f0faf9 60%, #e6f7f5 100%)',
-    glowColor: 'rgba(80, 197, 183, 0.15)',
-    iconColor: '#50C5B7'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8fdfc 30%, #f0faf9 60%, #e6f7f5 100%)'
   },
   rare: { 
     color: '#496DDB',
-    accent: '#3755b8',
-    borderColor: '#496DDB',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8faff 30%, #f0f4ff 60%, #e8f1ff 100%)',
-    glowColor: 'rgba(73, 109, 219, 0.15)',
-    iconColor: '#496DDB'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8faff 30%, #f0f4ff 60%, #e8f1ff 100%)'
   },
   legendary: { 
     color: '#DEC0F1',
-    accent: '#c7a8e3',
-    borderColor: '#DEC0F1',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fdf9ff 30%, #faf2ff 60%, #f5e8ff 100%)',
-    glowColor: 'rgba(222, 192, 241, 0.15)',
-    iconColor: '#DEC0F1'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fdf9ff 30%, #faf2ff 60%, #f5e8ff 100%)'
   },
   mythic: { 
     color: '#FFD700',
-    accent: '#ffcc00',
-    borderColor: 'transparent',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fffdf5 30%, #fffaeb 60%, #fff4d6 100%)',
-    glowColor: 'rgba(255, 215, 0, 0.2)',
-    iconColor: '#FFD700'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fffdf5 30%, #fffaeb 60%, #fff4d6 100%)'
   }
 };
 
-const cardStyle = computed(() => {
-  const config = rarityConfig[props.kanji.rarity];
-  return {
-    borderColor: config.borderColor,
-    background: config.bgGradient,
-    '--rarity-color': config.color,
-    '--rarity-accent': config.accent,
-    '--rarity-glow': config.glowColor
-  };
-});
+const cardStyle = computed(() => ({
+  background: rarityConfig[props.kanji.rarity].bgGradient,
+  '--rarity-color': rarityConfig[props.kanji.rarity].color
+}));
 
 // Animation sequence
 onMounted(() => {
@@ -99,45 +77,37 @@ onMounted(() => {
     document.body.style.overflow = 'hidden';
     
     nextTick(() => {
-      setTimeout(() => {
-        isFlipped.value = true;
-      }, 100);
-      
-      setTimeout(() => {
-        contentVisible.value = true;
-      }, 800);
+      setTimeout(() => isFlipped.value = true, 100);
+      setTimeout(() => contentVisible.value = true, 800);
     });
   }
 });
 
 const handleClose = () => {
   contentVisible.value = false;
-  
   document.body.style.pointerEvents = '';
   document.body.style.overflow = '';
   
   setTimeout(() => {
     isFlipped.value = false;
-    setTimeout(() => {
-      emit('close');
-    }, 600);
+    setTimeout(() => emit('close'), 600);
   }, 200);
 };
 </script>
 
 <template>
-  <!-- Modern Modal Overlay -->
+  <!-- Modal Overlay -->
   <div 
     class="fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-all duration-500"
     :class="isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
     @click.stop="handleClose"
   >
-    <!-- Enhanced Background -->
+    <!-- Background -->
     <div 
       class="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/85 to-slate-900/90 backdrop-blur-xl"
       @click.stop="handleClose"
     >
-      <!-- Animated background particles -->
+      <!-- Particles -->
       <div class="absolute inset-0 overflow-hidden">
         <div class="floating-particle particle-1"></div>
         <div class="floating-particle particle-2"></div>
@@ -146,52 +116,118 @@ const handleClose = () => {
       </div>
     </div>
     
-    <!-- Enhanced Close Button -->
+    <!-- Close Button -->
     <button 
-      class="fixed top-6 right-6 w-14 h-14 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 rounded-2xl flex items-center justify-center cursor-pointer z-[10001] opacity-0 scale-75 transition-all duration-500 shadow-xl hover:shadow-2xl group"
+      class="fixed top-6 right-6 w-14 h-14 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 rounded-2xl flex items-center justify-center z-[10001] opacity-0 scale-75 transition-all duration-500 shadow-xl group"
       :class="{ 'opacity-100 scale-100': contentVisible, 'hover:scale-105 hover:rotate-90': contentVisible }"
       @click="handleClose"
     >
       <X class="w-7 h-7 text-white transition-transform duration-300 group-hover:scale-110" />
     </button>
     
-    <!-- Enhanced Card Container - SIMPLIFIE -->
+    <!-- Card Container -->
     <div 
       class="relative w-full max-w-[min(92vw,580px)] h-auto max-h-[min(92vh,750px)] mx-auto flex items-center justify-center z-[10000]"
       style="perspective: 1200px;"
       @click.stop
     >
-      <!-- Flip Container with Enhanced 3D -->
+      <!-- Flip Container -->
       <div 
         class="relative w-full min-h-[520px] transition-all duration-1000 ease-out flip-container"
         :class="{ 'flipped': isFlipped }"
-        :style="{ 
-          height: 'min(88vh, 700px)',
-          transformStyle: 'preserve-3d'
-        }"
+        :style="{ height: 'min(88vh, 700px)', transformStyle: 'preserve-3d' }"
       >
-        <!-- FRONT FACE - Enhanced Design -->
+        <!-- FRONT FACE -->
         <div 
-          class="absolute inset-0 rounded-3xl overflow-hidden card-face shadow-2xl"
+          class="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl card-background"
           :class="kanji.rarity"
           style="backface-visibility: hidden; transform: rotateY(0deg);"
         >
-          <div class="w-full h-full rounded-3xl p-4 relative overflow-hidden flex flex-col modern-card-inner" :style="cardStyle">
-            <!-- Enhanced Rarity Badge -->
-            <div 
-              class="absolute top-4 right-4 px-4 py-2 rounded-2xl text-sm font-bold uppercase text-white z-20 shadow-xl"
-              :style="{ backgroundColor: rarityConfig[kanji.rarity].color }"
-            >
-              <div class="flex items-center gap-2">
-                <Sparkles class="w-4 h-4" />
-                {{ kanji.rarity }}
+          <!-- Motif hexagonal en fond -->
+          <div class="hex-pattern" :class="kanji.rarity">
+            <div class="hex-socket">
+              <div class="hex-gel center-gel">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c1 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c2 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c3 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c4 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c5 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c6 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c7 r2">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c8 r2">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c9 r2">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c10 r2">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c11 r2">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c12 r2">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
               </div>
             </div>
+          </div>
+
+          <div class="w-full h-full rounded-3xl p-4 relative overflow-hidden flex flex-col card-inner" :style="cardStyle">
+            <!-- Rarity Badge -->
+            <div 
+              class="absolute top-4 right-4 px-4 py-2 rounded-2xl text-sm font-bold uppercase text-white z-20 shadow-xl flex items-center gap-2"
+              :style="{ backgroundColor: rarityConfig[kanji.rarity].color }"
+            >
+              <Sparkles class="w-4 h-4" />
+              {{ kanji.rarity }}
+            </div>
             
-            <!-- Mythic shimmer simplifié -->
+            <!-- Mythic shimmer -->
             <div v-if="kanji.rarity === 'mythic'" class="mythic-shimmer"></div>
             
-            <!-- Enhanced Image Container -->
+            <!-- Image -->
             <div class="w-full h-48 mb-4 relative flex items-center justify-center overflow-hidden rounded-3xl">
               <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-3xl"></div>
               <img v-if="kanji.imageUrl" 
@@ -201,13 +237,12 @@ const handleClose = () => {
               <div class="absolute inset-0 rounded-3xl ring-1 ring-white/10"></div>
             </div>
             
-            <!-- Enhanced Character Display -->
+            <!-- Character Display -->
             <div class="text-center flex-1 flex flex-col justify-center">
               <div class="flex items-center justify-center gap-4 mb-4">
-                <span class="text-7xl font-black" 
+                <span class="text-7xl font-black font-japanese" 
                       :style="{ 
                         color: kanji.color, 
-                        fontFamily: 'Noto Sans JP, sans-serif',
                         textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                       }">
                   {{ kanji.japanese }}
@@ -218,7 +253,7 @@ const handleClose = () => {
                 <span class="text-xl text-gray-600 font-medium">{{ kanji.romaji }}</span>
               </div>
               
-              <!-- Enhanced Quote with Modern Styling -->
+              <!-- Quote -->
               <div v-if="kanji.quote" class="relative mt-auto p-4 bg-white/10 rounded-2xl border border-white/15">
                 <div class="relative">
                   <span class="absolute -left-2 -top-2 text-3xl opacity-30 font-serif" :style="{ color: rarityConfig[kanji.rarity].color }">❝</span>
@@ -230,19 +265,60 @@ const handleClose = () => {
           </div>
         </div>
 
-        <!-- BACK FACE - Enhanced Information Design -->
+        <!-- BACK FACE -->
         <div 
-          class="absolute inset-0 rounded-3xl overflow-hidden p-6 card-face shadow-2xl"
+          class="absolute inset-0 rounded-3xl overflow-hidden p-6 shadow-2xl card-background"
           :class="kanji.rarity"
           :style="{ ...cardStyle, backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }"
         >
+          <!-- Motif hexagonal en fond -->
+          <div class="hex-pattern" :class="kanji.rarity">
+            <div class="hex-socket">
+              <div class="hex-gel center-gel">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c1 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c2 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c3 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c4 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c5 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+              <div class="hex-gel c6 r1">
+                <div class="hex-brick h1"></div>
+                <div class="hex-brick h2"></div>
+                <div class="hex-brick h3"></div>
+              </div>
+            </div>
+          </div>
+
           <div 
-            class="h-full flex flex-col gap-6 overflow-hidden opacity-0 translate-y-8 transition-all duration-800"
+            class="h-full flex flex-col gap-6 overflow-hidden opacity-0 translate-y-8 transition-all duration-800 relative z-10"
             :class="{ 'opacity-100 translate-y-0': contentVisible }"
           >
-            <!-- Enhanced Header Section -->
+            <!-- Header Section -->
             <div class="flex gap-6 pb-4 border-b-2 border-gray-200 flex-shrink-0">
-              <!-- Enhanced Info Cards -->
+              <!-- Info Cards -->
               <div class="flex-1 flex flex-col gap-1.5">
                 <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
                   <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
@@ -254,7 +330,7 @@ const handleClose = () => {
                 
                 <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
                   <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                    <Zap class="w-3 h-3" />
+                    <BookOpen class="w-3 h-3" />
                   </div>
                   <span class="text-slate-700 min-w-[70px] text-sm font-semibold">Onyomi:</span>
                   <span class="text-slate-700 flex-1 font-japanese text-sm">{{ kanji.onyomi || 'N/A' }}</span>
@@ -278,12 +354,15 @@ const handleClose = () => {
                 
                 <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
                   <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                    <svg v-if="kanji.isJoyo" class="w-3 h-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                      <path d="M20 6L9 17l-5-5"/>
+                    <svg v-if="kanji.isJoyo" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2z"/>
+                      <path d="M19 11h-4a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2z"/>
+                      <path d="M7 7V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v4"/>
                     </svg>
-                    <svg v-else class="w-3 h-3 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                      <path d="M18 6L6 18"/>
-                      <path d="M6 6l12 12"/>
+                    <svg v-else class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="8" width="18" height="4" rx="1"/>
+                      <path d="M12 8v13"/>
+                      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
                     </svg>
                   </div>
                   <span class="text-slate-700 min-w-[70px] text-sm font-semibold">Jōyō kanji:</span>
@@ -293,12 +372,11 @@ const handleClose = () => {
                 </div>
               </div>
               
-              <!-- Enhanced Large Character Display -->
+              <!-- Large Character -->
               <div class="flex-none w-36 flex items-center justify-start pl-2">
-                <div class="text-8xl font-black leading-none relative z-10" 
+                <div class="text-8xl font-black leading-none font-japanese" 
                      :style="{ 
                        color: kanji.color, 
-                       fontFamily: 'Noto Sans JP, sans-serif',
                        textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                      }">
                   {{ kanji.japanese }}
@@ -306,7 +384,7 @@ const handleClose = () => {
               </div>
             </div>
             
-            <!-- Enhanced Compounds Section -->
+            <!-- Compounds Section -->
             <div v-if="kanji.compounds?.length" class="flex-1 flex flex-col min-h-0">
               <h3 class="text-xl font-bold text-slate-700 mb-2 pb-2 border-b-2 flex items-center gap-2" :style="{ borderColor: rarityConfig[kanji.rarity].color }">
                 <div class="flex items-center justify-center w-8 h-8 rounded-lg text-white" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
@@ -315,7 +393,7 @@ const handleClose = () => {
                 Compounds & Usage
               </h3>
               
-              <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              <div class="flex-1 overflow-y-auto custom-scroll">
                 <div class="flex flex-col gap-3 pr-3 pt-2">
                   <div 
                     v-for="(compound, index) in kanji.compounds" 
@@ -361,7 +439,7 @@ const handleClose = () => {
   transform: rotateY(180deg);
 }
 
-/* Mythic shimmer simplifié */
+/* Mythic shimmer */
 .mythic-shimmer {
   position: absolute;
   top: -50%;
@@ -380,7 +458,7 @@ const handleClose = () => {
   100% { transform: rotate(45deg) translateX(100%); }
 }
 
-/* Particules simplifiées */
+/* Particules */
 .floating-particle {
   position: absolute;
   width: 3px;
@@ -402,54 +480,179 @@ const handleClose = () => {
   100% { transform: translateY(-100vh); opacity: 0; }
 }
 
-/* Bordures par rareté - TOUTES IDENTIQUES MAINTENANT */
-.modern-card-inner {
+/* Card borders */
+.card-inner {
+  border: 3px solid;
+  border-color: var(--rarity-color);
   position: relative;
   z-index: 2;
-  border: 3px solid;
-  border-radius: 1.5rem;
 }
 
-.common .modern-card-inner {
-  border-color: #50C5B7;
-}
-
-.rare .modern-card-inner {
-  border-color: #496DDB;
-}
-
-.legendary .modern-card-inner {
-  border-color: #DEC0F1;
-}
-
-/* Carte mythique avec gradient statique */
-.mythic .modern-card-inner {
-  border: 3px solid;
+.mythic .card-inner {
   border-image: linear-gradient(45deg, #FFD700, #FFA500, #FF6347, #FFD700) 1;
 }
 
-/* Font Families */
+/* VRAIS MOTIFS HEXAGONAUX INTÉGRÉS */
+.hex-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.15;
+}
+
+.hex-socket {
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  left: 50%;
+  margin-left: -100px;
+  top: 50%;
+  margin-top: -100px;
+}
+
+.hex-brick {
+  width: 30px;
+  height: 17px;
+  position: absolute;
+  top: 5px;
+  animation-name: hexFade;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+.h2 {
+  transform: rotate(60deg);
+}
+
+.h3 {
+  transform: rotate(-60deg);
+}
+
+.hex-gel {
+  height: 30px;
+  width: 30px;
+  transition: all 0.3s;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.center-gel {
+  margin-left: -15px;
+  margin-top: -15px;
+  animation-name: hexPulse;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+.c1 { margin-left: -47px; margin-top: -15px; }
+.c2 { margin-left: -31px; margin-top: -43px; }
+.c3 { margin-left: 1px; margin-top: -43px; }
+.c4 { margin-left: 17px; margin-top: -15px; }
+.c5 { margin-left: -31px; margin-top: 13px; }
+.c6 { margin-left: 1px; margin-top: 13px; }
+.c7 { margin-left: -63px; margin-top: -43px; }
+.c8 { margin-left: 33px; margin-top: -43px; }
+.c9 { margin-left: -15px; margin-top: 41px; }
+.c10 { margin-left: -63px; margin-top: 13px; }
+.c11 { margin-left: 33px; margin-top: 13px; }
+.c12 { margin-left: -15px; margin-top: -71px; }
+
+.r1 {
+  animation-name: hexPulse;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-delay: 0.2s;
+}
+
+.r2 {
+  animation-name: hexPulse;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-delay: 0.4s;
+}
+
+.r1 > .hex-brick {
+  animation-name: hexFade;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-delay: 0.2s;
+}
+
+.r2 > .hex-brick {
+  animation-name: hexFade;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-delay: 0.4s;
+}
+
+/* Couleurs par rareté */
+.common .hex-brick {
+  background: #50C5B7;
+}
+
+.rare .hex-brick {
+  background: #496DDB;
+}
+
+.legendary .hex-brick {
+  background: #DEC0F1;
+}
+
+.mythic .hex-brick {
+  background: #FFD700;
+}
+
+/* Animations hexagonales */
+@keyframes hexPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.8); }
+  100% { transform: scale(1); }
+}
+
+@keyframes hexFade {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+@keyframes mythicShine {
+  0%, 100% { opacity: 0.18; transform: translateX(0); }
+  25% { opacity: 0.22; transform: translateX(1px); }
+  50% { opacity: 0.2; transform: translateX(-1px); }
+  75% { opacity: 0.21; transform: translateX(0.5px); }
+}
+
+/* Font japonaise */
 .font-japanese {
   font-family: "Noto Sans JP", sans-serif;
 }
 
-/* Responsive optimisé */
+/* Scrollbar custom */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: var(--rarity-color);
+  border-radius: 3px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .flip-container {
     height: min(80vh, 600px) !important;
     min-height: 450px !important;
   }
-  
-  .compound-card {
-    padding: 12px;
-  }
-  
-  .compound-kanji {
-    font-size: 20px;
-  }
 }
 
-/* Performance optimizations */
+/* Performance */
 @media (prefers-reduced-motion: reduce) {
   .flip-container,
   .mythic-shimmer,
@@ -460,33 +663,5 @@ const handleClose = () => {
   .flip-container.flipped {
     transform: rotateY(180deg);
   }
-}
-
-/* Scrollbar personnalisé */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.scrollbar-track-gray-100::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 3px;
-}
-
-/* Optimisations supplémentaires */
-.modern-card-inner {
-  will-change: auto;
-}
-
-.floating-particle {
-  will-change: transform;
-}
-
-.mythic-shimmer {
-  will-change: transform;
 }
 </style>

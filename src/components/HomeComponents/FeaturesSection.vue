@@ -1,10 +1,4 @@
-.feature-card.inactive:hover .feature-icon-container {
-  background: rgba(239, 217, 206, 0.9); /* Plus opaque au survol */
-}
-
-.feature-card.inactive:hover .feature-icon {
-  color: var(--color-dark-green); /* Icône devient noire au survol */
-}<script setup lang="ts">
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { GraduationCap, Target, BookOpen, TrendingUp } from 'lucide-vue-next';
 
@@ -62,6 +56,14 @@ const activateFeature = (index: number): void => {
   currentImageIndex.value = index;
 };
 
+// Handle radio change
+const handleRadioChange = (event: Event): void => {
+  const target = event.target as HTMLInputElement;
+  const index = parseInt(target.value);
+  activateFeature(index);
+  pauseRotation();
+};
+
 // Pause/Resume rotation
 const pauseRotation = () => {
   isPaused.value = true;
@@ -106,48 +108,56 @@ onUnmounted(() => {
       
       <!-- Main content grid -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <!-- Feature list -->
-        <div class="space-y-6">
-          <div v-for="(feature, index) in features" 
-               :key="index"
-               @mouseenter="() => { activateFeature(index); pauseRotation(); }"
-               @mouseleave="resumeRotation"
-               class="p-6 rounded-2xl cursor-pointer feature-card"
-               :class="feature.active ? 'active' : 'inactive'">
-            <div class="flex items-start space-x-4 relative z-10">
-              <!-- Icon container -->
-              <div class="feature-icon-container flex-shrink-0">
-                <component :is="feature.icon" class="feature-icon" />
-              </div>
-              <!-- Content -->
-              <div class="flex-1">
-                <h3 class="text-xl font-bold mb-2 feature-title">{{ feature.title }}</h3>
-                <p class="feature-description text-sm leading-relaxed">
-                  {{ feature.description }}
-                </p>
+        <!-- Glass selector -->
+        <div class="flex items-center justify-center lg:justify-start">
+          <div class="radio-input">
+            <div class="glass">
+              <div class="glass-inner"></div>
+            </div>
+            <div class="selector">
+              <div v-for="(feature, index) in features" 
+                   :key="index"
+                   class="choice"
+                   @mouseenter="() => { activateFeature(index); pauseRotation(); }"
+                   @mouseleave="resumeRotation">
+                <div>
+                  <input
+                    :id="`feature-${index}`"
+                    class="choice-circle"
+                    :checked="feature.active"
+                    :value="index"
+                    name="feature-selector"
+                    type="radio"
+                    @change="handleRadioChange"
+                  />
+                  <div class="ball"></div>
+                </div>
+                <label :for="`feature-${index}`" class="choice-name">
+                  {{ feature.title }}
+                </label>
               </div>
             </div>
           </div>
         </div>
         
-        <!-- Carousel display -->
-        <div class="rounded-3xl overflow-hidden shadow-2xl transform transition-all duration-800 carousel-container"
+        <!-- Content display -->
+        <div class="rounded-3xl overflow-hidden shadow-2xl transform transition-all duration-800 content-container"
              :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'">
           <!-- Main display area -->
-          <div class="carousel-display">
-            <div class="w-full h-full flex items-center justify-center">
+          <div class="content-display">
+            <div class="w-full h-full flex flex-col items-center justify-center p-8">
               <transition name="fade" mode="out-in">
-                <div :key="currentImageIndex" class="text-center p-8">
+                <div :key="currentImageIndex" class="text-center">
                   <!-- Large icon -->
-                  <div class="feature-icon-large mb-6">
+                  <div class="feature-icon-large mb-8">
                     <component :is="features[currentImageIndex].icon" class="icon-large" />
                   </div>
                   <!-- Feature info -->
-                  <h3 class="text-xl font-bold text-cream mb-2">
+                  <h3 class="text-2xl font-bold text-cream mb-4">
                     {{ features[currentImageIndex].title }}
                   </h3>
-                  <p class="text-sm text-cream/80">
-                    Interface preview coming soon
+                  <p class="text-cream/90 leading-relaxed max-w-md">
+                    {{ features[currentImageIndex].description }}
                   </p>
                 </div>
               </transition>
@@ -155,7 +165,7 @@ onUnmounted(() => {
           </div>
           
           <!-- Footer with indicators -->
-          <div class="py-4 px-6 carousel-footer">
+          <div class="py-4 px-6 content-footer">
             <div class="flex justify-center items-center">
               <div class="flex space-x-3">
                 <button v-for="(feature, index) in features" 
@@ -202,111 +212,6 @@ onUnmounted(() => {
   color: var(--color-cream);
 }
 
-/* Feature card styling */
-.feature-card {
-  border-radius: 1rem;
-  border: 2px solid transparent;
-  position: relative;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
-.feature-card.active {
-  background: rgba(239, 217, 206, 0.95);
-  border-color: var(--color-teal);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.feature-card.inactive {
-  background: rgba(20, 52, 43, 0.6);
-  border-color: rgba(80, 197, 183, 0.3);
-}
-
-.feature-card:hover {
-  transform: translateX(5px);
-  border-color: var(--color-lavender);
-}
-
-.feature-card.inactive:hover {
-  background: rgba(20, 52, 43, 0.8);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* Icon styling */
-.feature-icon-container {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.feature-card.active .feature-icon-container {
-  background: linear-gradient(135deg, var(--color-teal), var(--color-blue));
-}
-
-.feature-card.inactive .feature-icon-container {
-  background: rgba(239, 217, 206, 0.2);
-  border: 1px solid rgba(239, 217, 206, 0.3);
-}
-
-.feature-icon {
-  width: 28px;
-  height: 28px;
-  transition: all 0.3s ease;
-}
-
-.feature-card.active .feature-icon {
-  color: white;
-}
-
-.feature-card.inactive .feature-icon {
-  color: var(--color-cream);
-}
-
-/* Title styling */
-.feature-title {
-  transition: color 0.3s ease;
-  font-weight: 700;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-  color: white; /* Par défaut en blanc */
-}
-
-.feature-card.active .feature-title {
-  color: var(--color-dark-green); /* Noir quand actif */
-}
-
-.feature-card.inactive .feature-title {
-  color: white; /* Blanc quand inactif */
-}
-
-.feature-card.inactive:hover .feature-title {
-  color: var(--color-dark-green); /* Noir au survol */
-}
-
-/* Description styling */
-.feature-description {
-  transition: all 0.3s ease;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9); /* Par défaut en blanc transparent */
-}
-
-.feature-card.active .feature-description {
-  color: rgba(20, 52, 43, 0.9); /* Noir quand actif */
-}
-
-.feature-card.inactive .feature-description {
-  color: rgba(255, 255, 255, 0.9); /* Blanc quand inactif */
-}
-
-.feature-card.inactive:hover .feature-description {
-  color: rgba(20, 52, 43, 0.8); /* Noir au survol */
-}
-
 /* Gradient text for Nyto */
 .gradient-text-nyto {
   background: linear-gradient(135deg, #50C5B7 20%, #DEC0F1 80%);
@@ -319,29 +224,154 @@ onUnmounted(() => {
   filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.8)) drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-/* Carousel styling */
-.carousel-container {
+/* Glass Radio Input Styles */
+.radio-input {
+  display: flex;
+  height: 280px;
+  align-items: center;
+}
+
+.glass {
+  z-index: 2;
+  height: 110%;
+  width: 120px;
+  margin-right: 35px;
+  padding: 8px;
+  background-color: rgba(190, 189, 189, 0.5);
+  border-radius: 35px;
+  box-shadow: rgba(50, 50, 93, 0.2) 0px 25px 50px -10px,
+    rgba(0, 0, 0, 0.25) 0px 10px 30px -15px,
+    rgba(10, 37, 64, 0.26) 0px -2px 6px 0px inset;
+  backdrop-filter: blur(8px);
+}
+
+.glass-inner {
+  width: 100%;
+  height: 100%;
+  border-color: rgba(245, 245, 245, 0.45);
+  border-width: 9px;
+  border-style: solid;
+  border-radius: 30px;
+}
+
+.selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.choice {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.choice:hover {
+  transform: translateX(5px);
+}
+
+.choice > div {
+  position: relative;
+  width: 45px;
+  height: 45px;
+  margin-right: 20px;
+  z-index: 0;
+}
+
+.choice-circle {
+  appearance: none;
+  height: 100%;
+  width: 100%;
+  border-radius: 100%;
+  border-width: 9px;
+  border-style: solid;
+  border-color: rgba(245, 245, 245, 0.45);
+  cursor: pointer;
+  box-shadow: 0px 0px 20px -13px gray, 0px 0px 20px -14px gray inset;
+}
+
+.choice-circle:hover {
+  border-color: rgba(222, 192, 241, 0.6);
+  box-shadow: 0px 0px 20px -5px rgba(222, 192, 241, 0.6);
+}
+
+.ball {
+  z-index: 1;
+  position: absolute;
+  inset: 0px;
+  transform: translateX(-120px);
+  box-shadow: rgba(0, 0, 0, 0.17) 0px -10px 10px 0px inset,
+    rgba(0, 0, 0, 0.15) 0px -15px 15px 0px inset,
+    rgba(0, 0, 0, 0.1) 0px -40px 20px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px,
+    rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px,
+    rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px,
+    0px -1px 15px -8px rgba(0, 0, 0, 0.09);
+  border-radius: 100%;
+  transition: transform 800ms cubic-bezier(1, -0.4, 0, 1.4);
+}
+
+/* Couleurs spécifiques pour chaque boule selon votre palette */
+.choice:nth-child(1) .ball {
+  background-color: #DEC0F1; /* Mauve */
+}
+
+.choice:nth-child(2) .ball {
+  background-color: #50C5B7; /* Verdigris */
+}
+
+.choice:nth-child(3) .ball {
+  background-color: #496DDB; /* Royal Blue */
+}
+
+.choice:nth-child(4) .ball {
+  background-color: #14342B; /* Dark green */
+}
+
+.choice-circle:checked + .ball {
+  transform: translateX(0px);
+}
+
+.choice-name {
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  max-width: 200px;
+}
+
+.choice:hover .choice-name {
+  color: white;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* Content container styling */
+.content-container {
   background: linear-gradient(135deg, rgba(73, 109, 219, 0.9) 0%, rgba(80, 197, 183, 0.9) 100%);
   box-shadow: 0 20px 40px rgba(80, 197, 183, 0.3);
   border: 3px solid var(--color-lavender);
   position: relative;
 }
 
-.carousel-display {
+.content-display {
   background: linear-gradient(to bottom right, rgba(20, 52, 43, 0.9), rgba(20, 52, 43, 0.95));
-  min-height: 400px;
+  min-height: 450px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Large icon for carousel */
+/* Large icon for content */
 .feature-icon-large {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   background: linear-gradient(135deg, var(--color-teal), var(--color-blue));
   border-radius: 50%;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -361,14 +391,14 @@ onUnmounted(() => {
 }
 
 .icon-large {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   color: white;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* Carousel footer */
-.carousel-footer {
+/* Content footer */
+.content-footer {
   background: linear-gradient(90deg, rgba(20, 52, 43, 0.95) 0%, rgba(73, 109, 219, 0.95) 100%);
   border-top: 2px solid var(--color-teal);
   padding: 1rem 1.5rem;
@@ -396,7 +426,7 @@ onUnmounted(() => {
 
 /* Transitions */
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 
 .fade-enter-from, .fade-leave-to {
@@ -404,27 +434,86 @@ onUnmounted(() => {
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .radio-input {
+    height: 240px;
+    justify-content: center;
+  }
+  
+  .glass {
+    width: 100px;
+    margin-right: 25px;
+  }
+  
+  .choice-name {
+    font-size: 16px;
+    max-width: 180px;
+  }
+}
+
 @media (max-width: 768px) {
-  .feature-card {
-    padding: 1.25rem;
+  .radio-input {
+    height: 200px;
+    flex-direction: column;
+    align-items: center;
   }
   
-  .feature-description {
-    font-size: 0.9rem;
+  .glass {
+    height: 80px;
+    width: 300px;
+    margin-right: 0;
+    margin-bottom: 20px;
   }
   
-  .carousel-display {
-    min-height: 300px;
+  .glass-inner {
+    border-width: 6px;
+  }
+  
+  .selector {
+    flex-direction: row;
+    gap: 15px;
+  }
+  
+  .choice {
+    flex-direction: column;
+    text-align: center;
+    margin: 0;
+  }
+  
+  .choice > div {
+    margin-right: 0;
+    margin-bottom: 8px;
+    width: 35px;
+    height: 35px;
+  }
+  
+  .choice-name {
+    font-size: 14px;
+    max-width: 120px;
+    line-height: 1.2;
+  }
+  
+  .ball {
+    transform: translateY(-80px);
+  }
+  
+  .choice-circle:checked + .ball {
+    transform: translateY(0px);
+  }
+  
+  .content-display {
+    min-height: 350px;
+    padding: 1.5rem;
   }
   
   .feature-icon-large {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
   }
   
   .icon-large {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
   }
 }
 
@@ -435,17 +524,21 @@ onUnmounted(() => {
 }
 
 /* Performance optimizations */
-.feature-card {
+.choice {
   will-change: transform;
 }
 
-.feature-card:hover {
+.choice:hover {
   will-change: auto;
 }
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .feature-card {
+  .choice {
+    transition: none;
+  }
+  
+  .ball {
     transition: none;
   }
   
