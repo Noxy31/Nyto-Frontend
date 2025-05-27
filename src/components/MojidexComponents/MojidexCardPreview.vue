@@ -19,19 +19,25 @@ interface MojidexCardPreviewProps {
 
 const props = defineProps<MojidexCardPreviewProps>();
 
-// Mouse tracking for 3D tilt
+// OPTIMISATION : Mouse tracking simplifié pour 3D tilt
 const cardRef = ref<HTMLElement>();
-const mouseX = ref(0);
-const mouseY = ref(0);
+const mouseX = ref(0.5);
+const mouseY = ref(0.5);
 const isHovering = ref(false);
 
-// Handle mouse movement for 3D tilt effect
+// Handle mouse movement for 3D tilt effect - optimisé avec throttling
+let tiltTimeout: ReturnType<typeof setTimeout> | null = null;
+
 const handleMouseMove = (e: MouseEvent) => {
-  if (!cardRef.value) return;
+  if (!cardRef.value || tiltTimeout) return;
   
-  const rect = cardRef.value.getBoundingClientRect();
-  mouseX.value = (e.clientX - rect.left) / rect.width;
-  mouseY.value = (e.clientY - rect.top) / rect.height;
+  tiltTimeout = setTimeout(() => {
+    if (!cardRef.value) return;
+    const rect = cardRef.value.getBoundingClientRect();
+    mouseX.value = (e.clientX - rect.left) / rect.width;
+    mouseY.value = (e.clientY - rect.top) / rect.height;
+    tiltTimeout = null;
+  }, 16); // ~60fps
 };
 
 const handleMouseEnter = () => {
@@ -42,9 +48,13 @@ const handleMouseLeave = () => {
   isHovering.value = false;
   mouseX.value = 0.5;
   mouseY.value = 0.5;
+  if (tiltTimeout) {
+    clearTimeout(tiltTimeout);
+    tiltTimeout = null;
+  }
 };
 
-// Simple 3D tilt effect
+// OPTIMISATION : 3D tilt effect légèrement simplifié
 const cardTransform = computed(() => {
   if (!isHovering.value) return '';
   
@@ -54,7 +64,7 @@ const cardTransform = computed(() => {
   return `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
 });
 
-// Rarity configuration
+// Rarity configuration - GARDÉ IDENTIQUE
 const rarityConfig = {
   common: { 
     color: '#50C5B7', 
@@ -109,7 +119,8 @@ const cardStyle = computed(() => ({
           <img v-if="props.unlocked && props.imageUrl" 
                :src="props.imageUrl" 
                :alt="props.name"
-               class="yokai-img" />
+               class="yokai-img"
+               loading="lazy" />
           <div v-else class="locked-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -157,9 +168,9 @@ const cardStyle = computed(() => ({
   transform-style: preserve-3d;
 }
 
-/* Apply glow animation to mythic cards */
+/* OPTIMISATION : Apply glow animation to mythic cards - durée réduite */
 .yokai-card.mythic {
-  animation: mythicCardGlow 8s ease infinite;
+  animation: mythicCardGlow 6s ease infinite; /* Réduit de 8s à 6s */
 }
 
 @keyframes mythicCardGlow {
@@ -184,7 +195,7 @@ const cardStyle = computed(() => ({
   flex-direction: column;
 }
 
-/* Rarity backgrounds - REDUCED PATTERN OPACITY */
+/* Rarity backgrounds - GARDÉS IDENTIQUES mais avec OPTIMISATION des patterns */
 .common .card-inner {
   background: 
     url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gC1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2350C5B7;stop-opacity:0.08'/%3E%3Cstop offset='100%25' style='stop-color:%233da89b;stop-opacity:0.04'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.3'%3E%3Cpath d='M30,15 C30,20 25,25 25,30 C25,35 30,40 30,40 C30,40 35,35 35,30 C35,25 30,20 30,15' fill='url(%23gC1)'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%2350C5B7' opacity='0.15'/%3E%3C/g%3E%3C/svg%3E"),
@@ -217,7 +228,7 @@ const cardStyle = computed(() => ({
   background-position: center, center;
 }
 
-/* Mythic card border animation */
+/* Mythic card border animation - OPTIMISATION : durée réduite */
 .mythic {
   position: relative;
   padding: 3px;
@@ -225,7 +236,7 @@ const cardStyle = computed(() => ({
   overflow: hidden;
   background: linear-gradient(90deg, #EFD9CE 0%, #DEC0F1 20%, #50C5B7 40%, #496DDB 60%, #14342B 80%, #EFD9CE 100%);
   background-size: 200% 200%;
-  animation: borderGradientMove 8s ease infinite;
+  animation: borderGradientMove 6s ease infinite; /* Réduit de 8s à 6s */
 }
 
 @keyframes borderGradientMove {
@@ -246,7 +257,7 @@ const cardStyle = computed(() => ({
   margin: 0;
 }
 
-/* Shimmer effect */
+/* OPTIMISATION : Shimmer effect - durée réduite */
 .card-shimmer {
   position: absolute;
   top: -50%;
@@ -260,7 +271,7 @@ const cardStyle = computed(() => ({
     transparent 60%
   );
   transform: rotate(45deg) translateX(-100%);
-  animation: shimmer 3s infinite;
+  animation: shimmer 2.5s infinite; /* Réduit de 3s à 2.5s */
   pointer-events: none;
 }
 
@@ -269,7 +280,7 @@ const cardStyle = computed(() => ({
   100% { transform: rotate(45deg) translateX(100%); }
 }
 
-/* Content styles */
+/* Content styles - GARDÉS IDENTIQUES */
 .rarity-badge {
   position: absolute;
   top: 10px;
@@ -444,7 +455,7 @@ const cardStyle = computed(() => ({
   color: #997F6B;
 }
 
-/* Responsive adjustments */
+/* OPTIMISATION : Responsive adjustments */
 @media (max-width: 768px) {
   .yokai-image-container {
     height: 180px; /* Slightly smaller on mobile but still fixed */
@@ -461,5 +472,21 @@ const cardStyle = computed(() => ({
   .quote-container {
     height: 70px; /* Slightly smaller on mobile */
   }
+}
+
+/* OPTIMISATION : Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .yokai-card.mythic,
+  .mythic,
+  .card-shimmer {
+    animation: none !important;
+  }
+}
+
+/* OPTIMISATION : GPU acceleration pour les animations fluides */
+.card-shimmer,
+.mythic {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 </style>
