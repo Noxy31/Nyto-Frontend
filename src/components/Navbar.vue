@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import { Home, Star, Library, Tag, LogIn } from 'lucide-vue-next';
 
 // Props
@@ -14,14 +14,18 @@ const emit = defineEmits<{
   (e: 'navigate', section: string): void;
 }>();
 
-// States - simplified
+// States - avec ajout pour gérer le scroll programmatique
 const isMenuOpen = ref(false);
 const activeSection = ref('hero');
 const showHeader = ref(true);
 const lastScrollPosition = ref(0);
 const isScrolled = ref(false);
 
-// Methods - simplified
+// NOUVEAUX ÉTATS pour gérer le scroll automatique
+const isNavigating = ref(false);
+const navigationTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+
+// Methods
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
@@ -29,18 +33,40 @@ const toggleMenu = () => {
 const setActiveSection = (section: string) => {
   activeSection.value = section;
   isMenuOpen.value = false;
+  
+  // MARQUER QU'ON EST EN NAVIGATION AUTOMATIQUE
+  isNavigating.value = true;
+  
+  // Nettoyer le timeout précédent si il existe
+  if (navigationTimeout.value) {
+    clearTimeout(navigationTimeout.value);
+  }
+  
+  // Émettre l'événement de navigation
   emit('navigate', section);
+  
+  // DÉLAI pour permettre au scroll de se terminer
+  navigationTimeout.value = setTimeout(() => {
+    isNavigating.value = false;
+  }, 1500);
 };
 
-// Optimized scroll watcher - no timeout needed
+// WATCHER MODIFIÉ pour ignorer le scroll pendant la navigation
 watch(() => props.scrollY, (newVal) => {
   isScrolled.value = newVal > 50;
   
-  if (newVal > lastScrollPosition.value && newVal > 100) {
-    showHeader.value = false;
-  } else {
+  // SI ON EST EN NAVIGATION AUTOMATIQUE, ne pas cacher la navbar
+  if (isNavigating.value) {
     showHeader.value = true;
+  } else {
+    // COMPORTEMENT NORMAL pour le scroll manuel
+    if (newVal > lastScrollPosition.value && newVal > 100) {
+      showHeader.value = false;
+    } else {
+      showHeader.value = true;
+    }
   }
+  
   lastScrollPosition.value = newVal;
 });
 
@@ -51,7 +77,17 @@ const navItems = [
   { id: 'showcase', label: 'Mojidex', icon: Library },
   { id: 'action', label: 'Pricing', icon: Tag }
 ];
+
+// CLEANUP au démontage
+onUnmounted(() => {
+  if (navigationTimeout.value) {
+    clearTimeout(navigationTimeout.value);
+  }
+});
 </script>
+
+<!-- GARDEZ VOTRE TEMPLATE ET CSS EXISTANTS EXACTEMENT COMME ILS SONT ! -->
+<!-- Je ne modifie QUE le script setup -->
 
 <template>
   <header 

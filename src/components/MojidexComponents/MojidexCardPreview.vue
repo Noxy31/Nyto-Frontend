@@ -298,9 +298,15 @@ const cardStyle = computed(() => ({
 /* FIXED IMAGE CONTAINER */
 .yokai-image-container {
   width: 100%;
-  height: 200px; /* Fixed height for the image area */
+  /* Utiliser aspect-ratio pour maintenir 4:3 automatiquement */
+  aspect-ratio: 4 / 3;
   margin-bottom: 0.4rem;
   position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  
+  /* Hauteur calculée automatiquement basée sur la largeur */
+  /* Plus besoin de height: 200px fixe ! */
 }
 
 .yokai-image {
@@ -312,14 +318,26 @@ const cardStyle = computed(() => ({
   overflow: hidden;
   border-radius: 15px;
   background: transparent;
+  position: relative;
 }
 
 .yokai-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  /* Comme l'image ET le container sont 4:3, object-fit: fill est parfait */
+  object-fit: fill; /* Remplit exactement sans déformation car même ratio */
   border-radius: 15px;
+  display: block;
+  
+  /* Sécurités */
+  max-width: 100%;
+  max-height: 100%;
+  
+  /* Performance */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
+
 
 .locked-icon {
   color: rgba(0, 0, 0, 0.3);
@@ -471,15 +489,6 @@ const cardStyle = computed(() => ({
   
   .quote-container {
     height: 70px; /* Slightly smaller on mobile */
-  }
-}
-
-/* OPTIMISATION : Performance optimizations */
-@media (prefers-reduced-motion: reduce) {
-  .yokai-card.mythic,
-  .mythic,
-  .card-shimmer {
-    animation: none !important;
   }
 }
 

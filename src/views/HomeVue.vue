@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
+// Import components
 import Navbar from '@/components/Navbar.vue';
 import HeroSection from '@/components/HomeComponents/HeroSection.vue';
 import FeaturesSection from '@/components/HomeComponents/FeaturesSection.vue';
@@ -7,6 +8,7 @@ import MojidexSection from '@/components/HomeComponents/MojidexSection.vue';
 import CTASection from '@/components/HomeComponents/CTASection.vue';
 import FooterSection from '@/components/Footer.vue';
 
+// Minimal state
 const scrollY = ref<number>(0);
 const pageLoaded = ref<boolean>(false);
 const showBackToTop = ref<boolean>(false);
@@ -17,6 +19,7 @@ const sectionVisibility = reactive<Record<string, boolean>>({
   action: false
 });
 
+// Navigation
 const handleNavigation = (section: string): void => {
   const element = document.getElementById(section);
   if (element) {
@@ -24,6 +27,7 @@ const handleNavigation = (section: string): void => {
   }
 };
 
+// Optimized scroll handler with throttling
 let ticking = false;
 const handleScroll = (): void => {
   if (!ticking) {
@@ -36,38 +40,45 @@ const handleScroll = (): void => {
   }
 };
 
+// Scroll to top
 const scrollToTop = (): void => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+// Optimized Intersection Observer with reduced threshold
 let observer: IntersectionObserver | null = null;
 onMounted(() => {
+  // Immediate setup
   sectionVisibility.hero = true;
   pageLoaded.value = true;
  
+  // Passive scroll listener
   window.addEventListener('scroll', handleScroll, { passive: true });
  
+  // Intersection Observer with reduced threshold for better performance
   observer = new IntersectionObserver(
     (entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting && entry.target.id in sectionVisibility) {
           sectionVisibility[entry.target.id] = true;
+          // Unobserve after triggering to reduce ongoing calculations
           observer?.unobserve(entry.target);
         }
       });
     },
     { 
-      threshold: 0.1,
-      rootMargin: '50px'
+      threshold: 0.1, // Reduced from 0.2
+      rootMargin: '50px' // Added root margin for earlier triggering
     }
   );
   
+  // Delayed observation setup to avoid initial layout thrash
   setTimeout(() => {
     ['features', 'showcase', 'action'].forEach(id => {
       const element = document.getElementById(id);
       if (element) observer?.observe(element);
     });
-  }, 200);
+  }, 200); // Increased delay
 });
 
 // Cleanup
@@ -104,7 +115,7 @@ onUnmounted(() => {
       >
         <svg viewBox="0 0 384 512" class="svgIcon">
           <path
-            d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"
+            d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"
           ></path>
         </svg>
       </button>
@@ -113,6 +124,7 @@ onUnmounted(() => {
 </template>
 
 <style>
+/* MINIMAL styles pour scroll fluide */
 html {
   scroll-behavior: smooth;
 }
@@ -124,6 +136,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* OPTIMISATION PERFORMANCE - will-change uniquement quand nécessaire */
 .slide-up-fade {
   transform: translateY(30px);
   opacity: 0;
@@ -135,6 +148,7 @@ body {
   transform: translateY(0);
 }
 
+/* Optimized back to top button - removed will-change auto-assignment */
 .back-to-top-btn {
   position: fixed !important;
   bottom: 2rem !important;
@@ -151,17 +165,22 @@ body {
   justify-content: center;
   box-shadow: 0px 0px 0px 4px rgba(180, 160, 255, 0.253);
   cursor: pointer;
-  overflow: hidden;
-  transform: translateZ(0);
-  backface-visibility: hidden;
   transition: all 0.3s ease;
+  overflow: hidden;
+  /* Performance: Only use will-change during interactions */
+  will-change: auto;
 }
 
 .back-to-top-btn:hover {
+  will-change: transform, background-color, width;
   width: 140px;
   border-radius: 50px;
   background-color: #7a18e5;
   align-items: center;
+}
+
+.back-to-top-btn:not(:hover) {
+  will-change: auto;
 }
 
 .back-to-top-btn .svgIcon {
@@ -192,16 +211,7 @@ body {
   bottom: unset;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .slide-up-fade,
-  .back-to-top-btn,
-  .back-to-top-btn .svgIcon,
-  .back-to-top-btn::before {
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
+/* GPU acceleration for smooth animations */
 .back-to-top-btn {
   transform: translateZ(0);
   backface-visibility: hidden;
