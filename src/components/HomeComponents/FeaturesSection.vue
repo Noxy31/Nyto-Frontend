@@ -531,19 +531,4 @@ onUnmounted(() => {
 .choice:hover {
   will-change: auto;
 }
-
-/* Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .choice {
-    transition: none;
-  }
-  
-  .ball {
-    transition: none;
-  }
-  
-  .fade-enter-active, .fade-leave-active {
-    transition: none;
-  }
-}
 </style>
