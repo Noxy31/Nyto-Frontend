@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue';
 import { X, Sparkles, BookOpen } from 'lucide-vue-next';
 import HexagonPattern from './HexagonPattern.vue';
 
@@ -46,23 +46,32 @@ const emit = defineEmits<{
 const isFlipped = ref(false);
 const contentVisible = ref(false);
 
-// Rarity configuration
+// Cleanup timeout for performance
+let closeTimeout: ReturnType<typeof setTimeout> | null = null;
+let flipTimeout: ReturnType<typeof setTimeout> | null = null;
+let contentTimeout: ReturnType<typeof setTimeout> | null = null;
+
+// Rarity configuration - AVEC DARK MODE SUPPORT
 const rarityConfig = {
   common: { 
     color: '#50C5B7',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8fdfc 30%, #f0faf9 60%, #e6f7f5 100%)'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8fdfc 30%, #f0faf9 60%, #e6f7f5 100%)',
+    bgGradientDark: 'linear-gradient(135deg, #1f2937 0%, #2d3748 30%, #374151 60%, #4a5568 100%)'
   },
   rare: { 
     color: '#496DDB',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8faff 30%, #f0f4ff 60%, #e8f1ff 100%)'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8faff 30%, #f0f4ff 60%, #e8f1ff 100%)',
+    bgGradientDark: 'linear-gradient(135deg, #1e293b 0%, #334155 30%, #475569 60%, #64748b 100%)'
   },
   legendary: { 
     color: 'linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%)',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fdf9ff 30%, #faf2ff 60%, #f5e8ff 100%)'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fdf9ff 30%, #faf2ff 60%, #f5e8ff 100%)',
+    bgGradientDark: 'linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #334155 60%, #475569 100%)'
   },
   mythic: { 
     color: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%)',
-    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fffdf5 30%, #fffaeb 60%, #fff4d6 100%)'
+    bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fffdf5 30%, #fffaeb 60%, #fff4d6 100%)',
+    bgGradientDark: 'linear-gradient(135deg, #111827 0%, #1f2937 30%, #374151 60%, #4b5563 100%)'
   }
 };
 
@@ -84,7 +93,8 @@ const kanjiColor = computed(() => {
 
 const kanjiStyle = computed(() => {
   const baseStyle = {
-    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    transition: 'text-shadow 0.3s ease'
   };
 
   if (props.kanji.rarity === 'legendary') {
@@ -122,6 +132,11 @@ const cardStyle = computed(() => ({
   '--rarity-color': rarityConfig[props.kanji.rarity].color
 }));
 
+const cardStyleDark = computed(() => ({
+  background: rarityConfig[props.kanji.rarity].bgGradientDark,
+  '--rarity-color': rarityConfig[props.kanji.rarity].color
+}));
+
 // Interface pour la configuration des hexagones
 interface HexagonConfig {
   position: 'center' | 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -134,17 +149,36 @@ const hexagonConfig = computed((): HexagonConfig[] => {
   return [{ position: 'center', delay: 0 }];
 });
 
-// Animation sequence
+// Animation sequence optimisée
 onMounted(() => {
   if (props.isVisible) {
     document.body.style.pointerEvents = 'none';
     document.body.style.overflow = 'hidden';
     
     nextTick(() => {
-      setTimeout(() => isFlipped.value = true, 100);
-      setTimeout(() => contentVisible.value = true, 800);
+      flipTimeout = setTimeout(() => isFlipped.value = true, 100);
+      contentTimeout = setTimeout(() => contentVisible.value = true, 800);
     });
   }
+});
+
+// Cleanup optimisé
+onUnmounted(() => {
+  if (closeTimeout) {
+    clearTimeout(closeTimeout);
+    closeTimeout = null;
+  }
+  if (flipTimeout) {
+    clearTimeout(flipTimeout);
+    flipTimeout = null;
+  }
+  if (contentTimeout) {
+    clearTimeout(contentTimeout);
+    contentTimeout = null;
+  }
+  
+  document.body.style.pointerEvents = '';
+  document.body.style.overflow = '';
 });
 
 const handleClose = () => {
@@ -152,7 +186,7 @@ const handleClose = () => {
   document.body.style.pointerEvents = '';
   document.body.style.overflow = '';
   
-  setTimeout(() => {
+  closeTimeout = setTimeout(() => {
     isFlipped.value = false;
     setTimeout(() => emit('close'), 600);
   }, 200);
@@ -168,7 +202,7 @@ const handleClose = () => {
   >
     <!-- Background -->
     <div 
-      class="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/85 to-slate-900/90 backdrop-blur-xl"
+      class="absolute inset-0 modal-bg backdrop-blur-xl"
       @click.stop="handleClose"
     >
       <!-- Particles -->
@@ -218,7 +252,8 @@ const handleClose = () => {
             />
           </div>
 
-          <div class="w-full h-full rounded-3xl p-4 relative overflow-hidden flex flex-col card-inner" :style="cardStyle">
+          <div class="w-full h-full rounded-3xl p-4 relative overflow-hidden flex flex-col card-inner" 
+               :style="cardStyle">
             <!-- Rarity Badge -->
             <div 
               class="absolute top-4 right-4 px-4 py-2 rounded-2xl text-sm font-bold uppercase text-white z-20 shadow-xl flex items-center gap-2"
@@ -252,15 +287,15 @@ const handleClose = () => {
               </div>
               
               <div class="flex items-center justify-center gap-3 mb-6">
-                <span class="text-xl text-gray-600 font-medium">{{ kanji.romaji }}</span>
+                <span class="text-xl romaji-text font-medium">{{ kanji.romaji }}</span>
               </div>
               
               <!-- Quote -->
-              <div v-if="kanji.quote" class="relative mt-auto p-4 bg-white/10 rounded-2xl border border-white/15">
+              <div v-if="kanji.quote" class="relative mt-auto p-4 quote-container rounded-2xl border border-white/15">
                 <div class="relative">
-                  <span class="absolute -left-2 -top-2 text-3xl opacity-30 font-serif" :style="{ color: rarityConfig[kanji.rarity].color }">❝</span>
-                  <p class="text-sm leading-relaxed italic text-gray-700 px-4">{{ kanji.quote }}</p>
-                  <span class="absolute -right-2 -bottom-2 text-3xl opacity-30 font-serif" :style="{ color: rarityConfig[kanji.rarity].color }">❞</span>
+                  <span class="absolute -left-2 -top-2 text-3xl opacity-30 font-serif quote-mark" :style="{ color: rarityConfig[kanji.rarity].color }">❝</span>
+                  <p class="text-sm leading-relaxed italic quote-text px-4">{{ kanji.quote }}</p>
+                  <span class="absolute -right-2 -bottom-2 text-3xl opacity-30 font-serif quote-mark" :style="{ color: rarityConfig[kanji.rarity].color }">❞</span>
                 </div>
               </div>
             </div>
@@ -269,8 +304,8 @@ const handleClose = () => {
 
         <!-- BACK FACE -->
         <div 
-          class="absolute inset-0 rounded-3xl overflow-hidden p-6 shadow-2xl"
-          :style="{ ...cardStyle, backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }"
+          class="absolute inset-0 rounded-3xl overflow-hidden p-6 shadow-2xl card-back"
+          :style="{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }"
         >
           <!-- Hexagonal Pattern Background -->
           <div class="hex-container">
@@ -289,50 +324,50 @@ const handleClose = () => {
             :class="{ 'opacity-100 translate-y-0': contentVisible }"
           >
             <!-- Header Section -->
-            <div class="flex gap-6 pb-4 border-b-2 border-gray-200 flex-shrink-0">
+            <div class="flex gap-6 pb-4 border-b-2 header-border flex-shrink-0">
               <!-- Info Cards -->
                 <div class="flex-1 flex flex-col gap-1.5">
-                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                  <div class="flex items-center gap-2 px-3 py-2 info-card rounded-xl border border-white/15">
                     <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
                         :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
                         :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
                       <BookOpen class="w-3 h-3" />
                     </div>
-                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Kunyomi:</span>
-                    <span class="text-slate-800 flex-1 font-japanese text-base font-bold">{{ kanji.kunyomi || 'N/A' }}</span>
+                    <span class="info-label min-w-[70px] text-base font-extrabold">Kunyomi:</span>
+                    <span class="info-value flex-1 font-japanese text-base font-bold">{{ kanji.kunyomi || 'N/A' }}</span>
                   </div>
                   
-                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                  <div class="flex items-center gap-2 px-3 py-2 info-card rounded-xl border border-white/15">
                     <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
                         :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
                         :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
                       <BookOpen class="w-3 h-3" />
                     </div>
-                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Onyomi:</span>
-                    <span class="text-slate-800 flex-1 font-japanese text-base font-bold">{{ kanji.onyomi || 'N/A' }}</span>
+                    <span class="info-label min-w-[70px] text-base font-extrabold">Onyomi:</span>
+                    <span class="info-value flex-1 font-japanese text-base font-bold">{{ kanji.onyomi || 'N/A' }}</span>
                   </div>
                   
-                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                  <div class="flex items-center gap-2 px-3 py-2 info-card rounded-xl border border-white/15">
                     <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
                         :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
                         :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
                       <Sparkles class="w-3 h-3" />
                     </div>
-                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Meaning:</span>
-                    <span class="text-slate-800 flex-1 text-base font-bold">{{ kanji.meaning || 'N/A' }}</span>
+                    <span class="info-label min-w-[70px] text-base font-extrabold">Meaning:</span>
+                    <span class="info-value flex-1 text-base font-bold">{{ kanji.meaning || 'N/A' }}</span>
                   </div>
                   
-                  <div v-if="kanji.radical" class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                  <div v-if="kanji.radical" class="flex items-center gap-2 px-3 py-2 info-card rounded-xl border border-white/15">
                     <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
                         :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
                         :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
                       <span class="text-xs font-bold">部</span>
                     </div>
-                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Radical:</span>
-                    <span class="text-slate-800 flex-1 font-japanese text-base font-bold">{{ kanji.radical }}</span>
+                    <span class="info-label min-w-[70px] text-base font-extrabold">Radical:</span>
+                    <span class="info-value flex-1 font-japanese text-base font-bold">{{ kanji.radical }}</span>
                   </div>
                   
-                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                  <div class="flex items-center gap-2 px-3 py-2 info-card rounded-xl border border-white/15">
                     <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
                         :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
                         :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
@@ -347,8 +382,8 @@ const handleClose = () => {
                         <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
                       </svg>
                     </div>
-                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Jōyō kanji:</span>
-                    <span class="text-slate-800 flex-1 text-base font-bold" :class="kanji.isJoyo ? 'text-emerald-700' : 'text-red-700'">
+                    <span class="info-label min-w-[70px] text-base font-extrabold">Jōyō kanji:</span>
+                    <span class="info-value flex-1 text-base font-bold joyo-status" :class="kanji.isJoyo ? 'text-emerald-700' : 'text-red-700'">
                       {{ kanji.isJoyo ? 'Yes' : 'No' }}
                     </span>
                   </div>
@@ -365,7 +400,7 @@ const handleClose = () => {
             
             <!-- Compounds Section -->
               <div v-if="kanji.compounds?.length" class="flex-1 flex flex-col min-h-0">
-                <h3 class="text-2xl font-black text-slate-800 mb-2 pb-2 border-b-2 flex items-center gap-2" :style="{ borderColor: rarityConfig[kanji.rarity].color }">
+                <h3 class="text-2xl font-black compounds-title mb-2 pb-2 border-b-2 flex items-center gap-2" :style="{ borderColor: rarityConfig[kanji.rarity].color }">
                   <div class="flex items-center justify-center w-8 h-8 rounded-lg text-white icon-background-large" 
                       :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
                       :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
@@ -379,27 +414,27 @@ const handleClose = () => {
                     <div 
                       v-for="(compound, index) in kanji.compounds" 
                       :key="index"
-                      class="bg-white/20 border-2 rounded-xl p-4 opacity-0 -translate-x-4 transition-all duration-300 compound-item"
+                      class="compound-item border-2 rounded-xl p-4 opacity-0 -translate-x-4 transition-all duration-300"
                       :class="{ 'opacity-100 translate-x-0': contentVisible, [kanji.rarity + '-compound']: true }"
                       :style="{ transitionDelay: `${index * 0.1}s` }"
                     >
                       <div class="flex items-center gap-3 mb-3 pb-2 border-b border-white/15">
-                        <div class="text-3xl font-black font-japanese text-gray-900">{{ compound.kanji }}</div>
-                        <div class="text-xl font-bold text-slate-800">{{ compound.reading }}</div>
+                        <div class="text-3xl font-black font-japanese compound-kanji">{{ compound.kanji }}</div>
+                        <div class="text-xl font-bold compound-reading">{{ compound.reading }}</div>
                       </div>
                       
                       <div class="space-y-2">
-                        <div class="text-base text-slate-700">
-                          <span class="font-bold text-slate-600 mr-2">Meaning:</span>
+                        <div class="text-base compound-meaning">
+                          <span class="font-bold compound-label mr-2">Meaning:</span>
                           {{ compound.meaning }}
                         </div>
                         
-                        <div v-if="compound.kanjiBreakdown" class="text-base text-slate-700">
-                          <span class="font-bold text-slate-600 mr-2">Breakdown:</span>
+                        <div v-if="compound.kanjiBreakdown" class="text-base compound-breakdown">
+                          <span class="font-bold compound-label mr-2">Breakdown:</span>
                           {{ compound.kanjiBreakdown }}
                         </div>
                         
-                        <div v-if="compound.explanation" class="text-sm text-slate-600 italic mt-2 pt-2 border-t border-white/15 leading-relaxed">
+                        <div v-if="compound.explanation" class="text-sm compound-explanation italic mt-2 pt-2 border-t border-white/15 leading-relaxed">
                           {{ compound.explanation }}
                         </div>
                       </div>
@@ -418,6 +453,193 @@ const handleClose = () => {
 /* 3D Flip Animation */
 .flip-container.flipped {
   transform: rotateY(180deg);
+}
+
+/* DARK MODE BACKGROUND */
+.modal-bg {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.85) 50%, rgba(15, 23, 42, 0.9) 100%);
+  transition: background 0.3s ease;
+}
+
+.dark .modal-bg {
+  background: linear-gradient(135deg, rgba(3, 7, 18, 0.95) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(3, 7, 18, 0.95) 100%);
+}
+
+/* CARD STYLES AVEC DARK MODE */
+.card-inner {
+  border: 3px solid;
+  border-color: var(--rarity-color);
+  position: relative;
+  z-index: 2;
+  transition: background 0.3s ease;
+}
+
+.dark .card-inner {
+  background: var(--bg-gradient-dark, v-bind('cardStyleDark.background')) !important;
+}
+
+.card-back {
+  background: v-bind('cardStyle.background');
+  transition: background 0.3s ease;
+}
+
+.dark .card-back {
+  background: v-bind('cardStyleDark.background') !important;
+}
+
+/* TEXTES AVEC DARK MODE */
+.romaji-text {
+  color: #6b7280;
+  transition: color 0.3s ease;
+}
+
+.dark .romaji-text {
+  color: #d1d5db;
+}
+
+.quote-container {
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.3s ease;
+}
+
+.dark .quote-container {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.quote-text {
+  color: #374151;
+  transition: color 0.3s ease;
+}
+
+.dark .quote-text {
+  color: #d1d5db;
+}
+
+.quote-mark {
+  transition: color 0.3s ease;
+}
+
+/* INFO CARDS AVEC DARK MODE */
+.info-card {
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dark .info-card {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.info-label {
+  color: #1f2937;
+  transition: color 0.3s ease;
+}
+
+.dark .info-label {
+  color: #f9fafb;
+}
+
+.info-value {
+  color: #1f2937;
+  transition: color 0.3s ease;
+}
+
+.dark .info-value {
+  color: #f3f4f6;
+}
+
+.header-border {
+  border-color: #d1d5db;
+  transition: border-color 0.3s ease;
+}
+
+.dark .header-border {
+  border-color: #4b5563;
+}
+
+.compounds-title {
+  color: #1f2937;
+  transition: color 0.3s ease;
+}
+
+.dark .compounds-title {
+  color: #f9fafb;
+}
+
+/* COMPOUNDS AVEC DARK MODE */
+.compound-item {
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.dark .compound-item {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.compound-kanji {
+  color: #111827;
+  transition: color 0.3s ease;
+}
+
+.dark .compound-kanji {
+  color: #f9fafb;
+}
+
+.compound-reading {
+  color: #1f2937;
+  transition: color 0.3s ease;
+}
+
+.dark .compound-reading {
+  color: #e5e7eb;
+}
+
+.compound-meaning {
+  color: #374151;
+  transition: color 0.3s ease;
+}
+
+.dark .compound-meaning {
+  color: #d1d5db;
+}
+
+.compound-breakdown {
+  color: #374151;
+  transition: color 0.3s ease;
+}
+
+.dark .compound-breakdown {
+  color: #d1d5db;
+}
+
+.compound-label {
+  color: #4b5563;
+  transition: color 0.3s ease;
+}
+
+.dark .compound-label {
+  color: #9ca3af;
+}
+
+.compound-explanation {
+  color: #6b7280;
+  transition: color 0.3s ease;
+}
+
+.dark .compound-explanation {
+  color: #9ca3af;
+}
+
+.joyo-status {
+  transition: color 0.3s ease;
+}
+
+.dark .joyo-status.text-emerald-700 {
+  color: #10b981 !important;
+}
+
+.dark .joyo-status.text-red-700 {
+  color: #ef4444 !important;
 }
 
 /* COULEURS KANJI PAR RARETÉ */
@@ -470,6 +692,11 @@ const handleClose = () => {
   box-shadow: 0 2px 12px rgba(255, 215, 0, 0.2);
 }
 
+.dark .mythic-compound {
+  background: linear-gradient(#1f2937, #1f2937) padding-box,
+              linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%) border-box;
+}
+
 /* Hover effects pour les compounds */
 .compound-item:hover {
   transform: translateY(-2px);
@@ -490,7 +717,6 @@ const handleClose = () => {
   border-color: rgba(222, 192, 241, 0.6);
   box-shadow: 0 4px 16px rgba(222, 192, 241, 0.2);
 }
-
 
 /* Icônes avec dégradés par rareté */
 .legendary-icon {
@@ -613,14 +839,7 @@ const handleClose = () => {
   100% { transform: translateY(-100vh); opacity: 0; }
 }
 
-/* Card borders */
-.card-inner {
-  border: 3px solid;
-  border-color: var(--rarity-color);
-  position: relative;
-  z-index: 2;
-}
-
+/* Mythic card border */
 .mythic .card-inner {
   border-image: linear-gradient(45deg, #FFD700, #FFA500, #FF6347, #FFD700) 1;
 }
@@ -653,11 +872,76 @@ const handleClose = () => {
   border-radius: 3px;
 }
 
+.dark .custom-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .flip-container {
     height: min(80vh, 600px) !important;
     min-height: 450px !important;
   }
+}
+
+/* OPTIMISATION : Performance - reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .mythic .japanese-char,
+  .mythic-badge,
+  .mythic-icon,
+  .mythic-shimmer {
+    animation: none !important;
+  }
+  
+  .card-inner,
+  .card-back,
+  .romaji-text,
+  .quote-container,
+  .quote-text,
+  .info-card,
+  .info-label,
+  .info-value,
+  .compound-item,
+  .compound-kanji,
+  .compound-reading,
+  .compound-meaning,
+  .compound-breakdown,
+  .compound-label,
+  .compound-explanation {
+    transition: none !important;
+  }
+}
+
+/* OPTIMISATION : GPU acceleration */
+.mythic-shimmer,
+.mythic .japanese-char,
+.mythic-badge,
+.mythic-icon {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: background-position, filter;
+}
+
+.card-inner,
+.card-back {
+  will-change: background-color;
+}
+
+.info-card,
+.compound-item {
+  will-change: background-color, border-color;
+}
+
+.romaji-text,
+.quote-text,
+.info-label,
+.info-value,
+.compound-kanji,
+.compound-reading,
+.compound-meaning,
+.compound-breakdown,
+.compound-label,
+.compound-explanation {
+  will-change: color;
 }
 </style>

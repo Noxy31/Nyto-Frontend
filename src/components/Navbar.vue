@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { Home, Star, Library, Tag, LogIn } from 'lucide-vue-next'
 import LightSwitch from '@/components/LightSwitch.vue'
+
+// Import des logos statiquement
+import Logo1 from '@/assets/Logos/Logo1.png'
+import LogoDarkMode from '@/assets/Logos/Logo-DarkMode.png'
 
 // Props & Emits
 interface NavbarProps {
@@ -17,6 +21,7 @@ const showHeader = ref(true)
 const lastScrollPosition = ref(0)
 const isScrolled = ref(false)
 const isNavigating = ref(false)
+const isDarkMode = ref(false)
 
 // Optimisation: utiliser des variables plutôt que des refs pour les timeouts
 let navigationTimeout: ReturnType<typeof setTimeout> | null = null
@@ -30,6 +35,20 @@ const navItems = [
   { id: 'showcase', label: 'Mojidex', icon: Library },
   { id: 'action', label: 'Pricing', icon: Tag }
 ] as const
+
+// Logo dynamique selon le thème - FIXÉ
+const logoSrc = computed(() => {
+  return isDarkMode.value ? LogoDarkMode : Logo1
+})
+
+// Observer les changements de thème
+const themeObserver = ref<MutationObserver | null>(null)
+
+// Fonction pour détecter le mode dark
+const detectDarkMode = () => {
+  isDarkMode.value = document.documentElement.classList.contains('dark') || 
+                     document.body.classList.contains('dark')
+}
 
 // Methods
 const toggleMenu = () => {
@@ -126,6 +145,31 @@ const setupSectionObserver = () => {
   }
 }
 
+// Observer les changements de thème - OPTIMISÉ
+const setupThemeObserver = () => {
+  // Détection initiale
+  detectDarkMode()
+  
+  themeObserver.value = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        detectDarkMode()
+      }
+    })
+  })
+  
+  // Observer les changements de classe sur html et body
+  themeObserver.value.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+  
+  themeObserver.value.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+}
+
 // Optimisation: watcher avec debouncing implicite
 let scrollTimeout: ReturnType<typeof setTimeout> | null = null
 watch(() => props.scrollY, (newVal) => {
@@ -152,6 +196,7 @@ onMounted(async () => {
   // Optimisation: attendre que le DOM soit complètement rendu
   await nextTick()
   setTimeout(setupSectionObserver, 100) // Réduit de 500ms à 100ms
+  setupThemeObserver() // Observer les changements de thème
 })
 
 onUnmounted(() => {
@@ -167,6 +212,10 @@ onUnmounted(() => {
   if (sectionObserver) {
     sectionObserver.disconnect()
     sectionObserver = null
+  }
+  if (themeObserver.value) {
+    themeObserver.value.disconnect()
+    themeObserver.value = null
   }
 })
 </script>
@@ -184,7 +233,12 @@ onUnmounted(() => {
         <!-- Logo -->
         <div class="flex items-center">
           <a href="#" class="flex items-center" @click.prevent="setActiveSection('hero')">
-            <img src="@/assets/Logos/Logo1.png" alt="Nyto.ai Logo" class="h-14 md:h-16 transition-transform duration-300 hover:scale-105" />
+            <img 
+              :src="logoSrc" 
+              alt="Nyto.ai Logo" 
+              class="h-14 md:h-16 transition-all duration-300 hover:scale-105"
+              :key="logoSrc"
+            />
           </a>
         </div>
 
