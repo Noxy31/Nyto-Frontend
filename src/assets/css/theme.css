@@ -1,0 +1,73 @@
+:root {
+  --color-cream: #EFD9CE;
+  --color-lavender: #DEC0F1;
+  --color-teal: #50C5B7;
+  --color-blue: #496DDB;
+  --color-dark-green: #14342B;
+  
+  --transition-theme: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-transition,
+.theme-transition *,
+.theme-transition *:before,
+.theme-transition *:after {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-delay: 0s !important;
+}
+
+.text-theme {
+  color: var(--color-dark-green);
+  transition: var(--transition-theme);
+}
+
+.dark .text-theme {
+  color: white;
+}
+
+.text-theme-muted {
+  color: #6b7280;
+  transition: var(--transition-theme);
+}
+
+.dark .text-theme-muted {
+  color: #9ca3af;
+}
+
+.bg-theme {
+  background-color: white;
+  transition: var(--transition-theme);
+}
+
+.dark .bg-theme {
+  background-color: #1f2937;
+}
+
+.bg-theme-elevated {
+  background-color: #f9fafb;
+  transition: var(--transition-theme);
+}
+
+.dark .bg-theme-elevated {
+  background-color: #374151;
+}
+
+.glass-light {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  transition: var(--transition-theme);
+}
+
+.dark .glass-light {
+  background-color: rgba(31, 41, 55, 0.7);
+}
+
+.glass-strong {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  transition: var(--transition-theme);
+}
+
+.dark .glass-strong {
+  background-color: rgba(31, 41, 55, 0.85);
+}

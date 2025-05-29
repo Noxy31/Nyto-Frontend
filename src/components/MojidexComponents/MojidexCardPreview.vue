@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onUnmounted } from 'vue';
 
 // Props interface
 interface MojidexCardPreviewProps {
@@ -53,6 +53,14 @@ const handleMouseLeave = () => {
     tiltTimeout = null;
   }
 };
+
+// Cleanup optimisé
+onUnmounted(() => {
+  if (tiltTimeout) {
+    clearTimeout(tiltTimeout);
+    tiltTimeout = null;
+  }
+});
 
 // OPTIMISATION : 3D tilt effect légèrement simplifié
 const cardTransform = computed(() => {
@@ -197,11 +205,19 @@ const cardStyle = computed(() => ({
   flex-direction: column;
 }
 
-/* Rarity backgrounds - GARDÉS IDENTIQUES mais avec OPTIMISATION des patterns */
+/* Rarity backgrounds - AVEC DARK MODE SUPPORT */
 .common .card-inner {
   background: 
     url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gC1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2350C5B7;stop-opacity:0.08'/%3E%3Cstop offset='100%25' style='stop-color:%233da89b;stop-opacity:0.04'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.3'%3E%3Cpath d='M30,15 C30,20 25,25 25,30 C25,35 30,40 30,40 C30,40 35,35 35,30 C35,25 30,20 30,15' fill='url(%23gC1)'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%2350C5B7' opacity='0.15'/%3E%3C/g%3E%3C/svg%3E"),
     linear-gradient(135deg, #FFFFFF 0%, #F8F4F0 70%, #EFD9CE 100%);
+  background-size: 60px 60px, cover;
+  background-position: center, center;
+}
+
+.dark .common .card-inner {
+  background: 
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gC1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2350C5B7;stop-opacity:0.08'/%3E%3Cstop offset='100%25' style='stop-color:%233da89b;stop-opacity:0.04'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.3'%3E%3Cpath d='M30,15 C30,20 25,25 25,30 C25,35 30,40 30,40 C30,40 35,35 35,30 C35,25 30,20 30,15' fill='url(%23gC1)'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%2350C5B7' opacity='0.15'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(135deg, #1f2937 0%, #374151 70%, #4b5563 100%);
   background-size: 60px 60px, cover;
   background-position: center, center;
 }
@@ -214,6 +230,14 @@ const cardStyle = computed(() => ({
   background-position: center, center;
 }
 
+.dark .rare .card-inner {
+  background: 
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gR1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23496DDB;stop-opacity:0.09'/%3E%3Cstop offset='100%25' style='stop-color:%233755b8;stop-opacity:0.04'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.3'%3E%3Cpath d='M40,20 L60,40 L40,60 L20,40 Z' fill='none' stroke='url(%23gR1)' stroke-width='3'/%3E%3Cpath d='M40,28 L52,40 L40,52 L28,40 Z' fill='url(%23gR1)'/%3E%3Ccircle cx='40' cy='40' r='6' fill='%23496DDB' opacity='0.15'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(135deg, #1e293b 0%, #334155 70%, #475569 100%);
+  background-size: 80px 80px, cover;
+  background-position: center, center;
+}
+
 .legendary .card-inner {
   background: 
     url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gL1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23DEC0F1;stop-opacity:0.1'/%3E%3Cstop offset='100%25' style='stop-color:%23c7a8e3;stop-opacity:0.05'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.35'%3E%3Cpath d='M50,20 L55,40 L75,40 L60,52 L65,72 L50,60 L35,72 L40,52 L25,40 L45,40 Z' fill='url(%23gL1)'/%3E%3Cpath d='M50,35 L52,45 L62,45 L54,51 L56,61 L50,55 L44,61 L46,51 L38,45 L48,45 Z' fill='none' stroke='%23DEC0F1' stroke-width='2' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23DEC0F1' opacity='0.2'/%3E%3C/g%3E%3C/svg%3E"),
@@ -222,10 +246,26 @@ const cardStyle = computed(() => ({
   background-position: center, center;
 }
 
+.dark .legendary .card-inner {
+  background: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gL1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23DEC0F1;stop-opacity:0.1'/%3E%3Cstop offset='100%25' style='stop-color:%23c7a8e3;stop-opacity:0.05'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.35'%3E%3Cpath d='M50,20 L55,40 L75,40 L60,52 L65,72 L50,60 L35,72 L40,52 L25,40 L45,40 Z' fill='url(%23gL1)'/%3E%3Cpath d='M50,35 L52,45 L62,45 L54,51 L56,61 L50,55 L44,61 L46,51 L38,45 L48,45 Z' fill='none' stroke='%23DEC0F1' stroke-width='2' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23DEC0F1' opacity='0.2'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(135deg, #0f172a 0%, #1e293b 70%, #334155 100%);
+  background-size: 100px 100px, cover;
+  background-position: center, center;
+}
+
 .mythic .card-inner {
   background: 
     url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gM1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23FFD700;stop-opacity:0.12'/%3E%3Cstop offset='50%25' style='stop-color:%23FFA500;stop-opacity:0.08'/%3E%3Cstop offset='100%25' style='stop-color:%23FF8C00;stop-opacity:0.04'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.35'%3E%3Ccircle cx='60' cy='60' r='35' fill='none' stroke='url(%23gM1)' stroke-width='3'/%3E%3Cpath d='M60,25 L65,45 L85,50 L70,60 L75,80 L60,70 L45,80 L50,60 L35,50 L55,45 Z' fill='url(%23gM1)'/%3E%3Cpath d='M60,40 L62,50 L72,52 L65,57 L67,67 L60,62 L53,67 L55,57 L48,52 L58,50 Z' fill='%23FFD700' opacity='0.15'/%3E%3Ccircle cx='60' cy='60' r='8' fill='%23FFD700' opacity='0.12'/%3E%3C/g%3E%3C/svg%3E"),
     linear-gradient(135deg, #FFFFFF 0%, #FFFBF0 70%, #FFF4E0 100%);
+  background-size: 120px 120px, cover;
+  background-position: center, center;
+}
+
+.dark .mythic .card-inner {
+  background: 
+    url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='gM1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23FFD700;stop-opacity:0.12'/%3E%3Cstop offset='50%25' style='stop-color:%23FFA500;stop-opacity:0.08'/%3E%3Cstop offset='100%25' style='stop-color:%23FF8C00;stop-opacity:0.04'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg opacity='0.35'%3E%3Ccircle cx='60' cy='60' r='35' fill='none' stroke='url(%23gM1)' stroke-width='3'/%3E%3Cpath d='M60,25 L65,45 L85,50 L70,60 L75,80 L60,70 L45,80 L50,60 L35,50 L55,45 Z' fill='url(%23gM1)'/%3E%3Cpath d='M60,40 L62,50 L72,52 L65,57 L67,67 L60,62 L53,67 L55,57 L48,52 L58,50 Z' fill='%23FFD700' opacity='0.15'/%3E%3Ccircle cx='60' cy='60' r='8' fill='%23FFD700' opacity='0.12'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(135deg, #111827 0%, #1f2937 70%, #374151 100%);
   background-size: 120px 120px, cover;
   background-position: center, center;
 }
@@ -383,6 +423,11 @@ const cardStyle = computed(() => ({
 .locked-icon {
   color: rgba(0, 0, 0, 0.3);
   transform: scale(1.2);
+  transition: color 0.3s ease;
+}
+
+.dark .locked-icon {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .card-info {
@@ -401,6 +446,12 @@ const cardStyle = computed(() => ({
   font-family: 'Karasha', serif;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transition: color 0.3s ease;
+}
+
+.dark .card-name {
+  color: #f9fafb;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.1);
 }
 
 .mythic-name {
@@ -426,6 +477,11 @@ const cardStyle = computed(() => ({
   font-weight: 900;
   font-family: "Noto Sans JP", sans-serif;
   text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: text-shadow 0.3s ease;
+}
+
+.dark .japanese-char {
+  text-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
 }
 
 /* COULEURS KANJI PAR RARETÉ - DYNAMIQUES */
@@ -483,14 +539,24 @@ const cardStyle = computed(() => ({
   font-size: 1.2rem;
   color: #6A6262;
   font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.dark .romaji {
+  color: #d1d5db;
 }
 
 .separator {
   color: #6A6262;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-/* Quote styling - FIXED HEIGHT */
+.dark .separator {
+  color: #d1d5db;
+}
+
+/* Quote styling - FIXED HEIGHT AVEC DARK MODE */
 .quote-container {
   position: relative;
   margin-top: auto;
@@ -513,6 +579,7 @@ const cardStyle = computed(() => ({
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 0.3s ease;
 }
 
 .quote-mark {
@@ -520,6 +587,7 @@ const cardStyle = computed(() => ({
   font-size: 1.5rem;
   opacity: 0.4;
   font-family: serif;
+  transition: color 0.3s ease;
 }
 
 .quote-mark.left {
@@ -532,12 +600,20 @@ const cardStyle = computed(() => ({
   bottom: 0;
 }
 
-/* Quote colors by rarity - DARKER FOR BETTER VISIBILITY */
+/* Quote colors by rarity - AVEC DARK MODE SUPPORT */
 .common .quote-text {
   color: #6A9690;
 }
 
+.dark .common .quote-text {
+  color: #94a3b8;
+}
+
 .common .quote-mark {
+  color: #50C5B7;
+}
+
+.dark .common .quote-mark {
   color: #50C5B7;
 }
 
@@ -545,7 +621,15 @@ const cardStyle = computed(() => ({
   color: #6B85D0;
 }
 
+.dark .rare .quote-text {
+  color: #93c5fd;
+}
+
 .rare .quote-mark {
+  color: #496DDB;
+}
+
+.dark .rare .quote-mark {
   color: #496DDB;
 }
 
@@ -553,7 +637,15 @@ const cardStyle = computed(() => ({
   color: #AA9BBF;
 }
 
+.dark .legendary .quote-text {
+  color: #c4b5fd;
+}
+
 .legendary .quote-mark {
+  color: #DEC0F1;
+}
+
+.dark .legendary .quote-mark {
   color: #DEC0F1;
 }
 
@@ -561,8 +653,16 @@ const cardStyle = computed(() => ({
   color: #90775F;
 }
 
+.dark .mythic .quote-text {
+  color: #fbbf24;
+}
+
 .mythic .quote-mark {
   color: #997F6B;
+}
+
+.dark .mythic .quote-mark {
+  color: #f59e0b;
 }
 
 /* OPTIMISATION : Responsive adjustments */
@@ -580,20 +680,48 @@ const cardStyle = computed(() => ({
   }
 }
 
-/* OPTIMISATION : Performance */
+/* OPTIMISATION : Performance - reduce motion */
 @media (prefers-reduced-motion: reduce) {
   .yokai-card.mythic,
   .mythic,
   .card-shimmer,
-  .mythic .japanese-char {
+  .mythic .japanese-char,
+  .mythic-badge {
     animation: none !important;
+  }
+  
+  .card-inner,
+  .card-name,
+  .japanese-char,
+  .romaji,
+  .separator,
+  .quote-text,
+  .quote-mark,
+  .locked-icon {
+    transition: none !important;
   }
 }
 
 /* OPTIMISATION : GPU acceleration pour les animations fluides */
 .card-shimmer,
-.mythic {
+.mythic,
+.mythic .japanese-char,
+.mythic-badge {
   transform: translateZ(0);
   backface-visibility: hidden;
+  will-change: background-position, filter;
+}
+
+.card-inner {
+  will-change: background-color, border-color;
+}
+
+.card-name,
+.romaji,
+.separator,
+.quote-text,
+.quote-mark,
+.locked-icon {
+  will-change: color;
 }
 </style>

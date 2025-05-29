@@ -1,77 +1,83 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { GraduationCap, Target, BookOpen, TrendingUp } from 'lucide-vue-next';
+import { ref, onMounted } from 'vue'
+import { GraduationCap, Target, BookOpen, TrendingUp } from 'lucide-vue-next'
 
 // Props
 interface HeroSectionProps {
-  isVisible: boolean;
+  isVisible: boolean
 }
+const props = defineProps<HeroSectionProps>()
 
-const props = defineProps<HeroSectionProps>();
+// Animation state
+const textVisible = ref(false)
 
-// Main animation states
-const textVisible = ref<boolean>(false);
-
-// Simplified Japanese symbols for background
+// Optimisation: constantes pour éviter les recalculs
 const symbols = [
   { char: '日', x: 10, y: 20, size: 45, rotation: -10, color: '#DEC0F1' },
   { char: '本', x: 85, y: 15, size: 40, rotation: 15, color: '#50C5B7' },
   { char: '語', x: 15, y: 80, size: 50, rotation: 5, color: '#496DDB' },
   { char: '学', x: 90, y: 75, size: 35, rotation: -15, color: '#EFD9CE' },
   { char: '習', x: 50, y: 10, size: 38, rotation: 0, color: '#50C5B7' }
-];
+] as const
 
-// Simplified center kanjis
 const centerKanjis = ref([
   { char: '学', meaning: 'study', active: false, color: '#50C5B7' },
   { char: '進', meaning: 'progress', active: false, color: '#496DDB' },
   { char: '成', meaning: 'accomplish', active: false, color: '#DEC0F1' }
-]);
+])
 
-// Initialize animations - simplified
+const featureIcons = [
+  { icon: GraduationCap, title: 'All Levels', desc: 'From beginner to pro' },
+  { icon: Target, title: 'Gamified Learning', desc: 'Fun interactive games' },
+  { icon: BookOpen, title: 'Mojidex', desc: 'Your kanji companion' },
+  { icon: TrendingUp, title: 'Track Progress', desc: 'Real-time analytics' }
+] as const
+
+// Optimisation: animation avec requestAnimationFrame
 onMounted(() => {
   requestAnimationFrame(() => {
-    textVisible.value = true;
+    textVisible.value = true
     
-    // Animate center kanjis with reduced delays
+    // Animation des kanjis avec délais optimisés
     centerKanjis.value.forEach((kanji, index) => {
       setTimeout(() => {
-        kanji.active = true;
-      }, 800 + index * 400);
-    });
-  });
-});
+        kanji.active = true
+      }, 800 + index * 400)
+    })
+  })
+})
 </script>
 
 <template>
-  <section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden hero-background pt-20">
-    <!-- Static background elements - minimal -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div v-for="(symbol, index) in symbols" 
-           :key="index"
-           class="absolute symbol-static"
-           :style="{
-             top: `${symbol.y}%`,
-             left: `${symbol.x}%`,
-             fontSize: `${symbol.size}px`,
-             color: symbol.color,
-             transform: `rotate(${symbol.rotation}deg)`
-           }">
+  <section id="hero" class="hero-section">
+    <!-- Background symbols -->
+    <div class="hero-bg-symbols">
+      <div 
+        v-for="(symbol, index) in symbols" 
+        :key="index"
+        class="symbol-static"
+        :style="{
+          top: `${symbol.y}%`,
+          left: `${symbol.x}%`,
+          fontSize: `${symbol.size}px`,
+          color: symbol.color,
+          transform: `rotate(${symbol.rotation}deg)`
+        }">
         {{ symbol.char }}
       </div>
     </div>
     
     <!-- Main content -->
-    <div class="container relative z-10 px-6 md:px-12 mx-auto flex flex-col items-center">
-      <!-- Content row -->
-      <div class="flex flex-col lg:flex-row w-full items-center">
-        <!-- Left side - Text content -->
-        <div class="lg:w-1/2 slide-up-fade" :class="{ 'element-visible': textVisible }">
-          <div class="pr-0 lg:pr-16 space-y-6">
+    <div class="hero-container">
+      <div class="hero-content">
+        
+        <!-- Text content -->
+        <div class="hero-text-section slide-up-fade" :class="{ 'element-visible': textVisible }">
+          <div class="hero-text-content">
             <h1 class="hero-title">
-              <span class="block">Master</span>
-              <span class="gradient-text">Japanese</span>
-              <span class="block">with Nyto</span>
+              <span class="hero-title-line">Master</span>
+              <span class="hero-title-gradient">Japanese</span>
+              <span class="hero-title-line">with Nyto</span>
             </h1>
             
             <p class="hero-subtitle">
@@ -79,11 +85,11 @@ onMounted(() => {
               personalizes your journey and accelerates your progress to fluency.
             </p>
             
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
-              <button class="primary-button">
+            <div class="hero-buttons">
+              <button class="btn-primary">
                 Start Learning Now
               </button>
-              <button class="secondary-button">
+              <button class="btn-secondary">
                 <BookOpen class="w-5 h-5 mr-2" />
                 Explore Mojidex
               </button>
@@ -91,28 +97,29 @@ onMounted(() => {
           </div>
         </div>
         
-        <!-- Right side - Visual elements -->
-        <div class="lg:w-1/2 mt-12 lg:mt-0 slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.2s;">
-          <div class="relative display-container">
-            <!-- Static circle background -->
-            <div class="circle-background-static"></div>
+        <!-- Visual elements -->
+        <div class="hero-visual-section slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.2s;">
+          <div class="visual-container">
+            <!-- Background circle -->
+            <div class="circle-bg"></div>
             
-            <!-- Main kanji display -->
+            <!-- Kanji display -->
             <div class="kanji-display">
-              <div v-for="(kanji, index) in centerKanjis" 
-                   :key="index"
-                   class="kanji-card"
-                   :class="{ 'active': kanji.active }"
-                   :style="{ 
-                     backgroundColor: kanji.color,
-                     zIndex: centerKanjis.length - index
-                   }">
-                <div class="kanji-character">{{ kanji.char }}</div>
+              <div 
+                v-for="(kanji, index) in centerKanjis" 
+                :key="index"
+                class="kanji-card"
+                :class="{ 'active': kanji.active }"
+                :style="{ 
+                  backgroundColor: kanji.color,
+                  zIndex: centerKanjis.length - index
+                }">
+                <div class="kanji-char">{{ kanji.char }}</div>
                 <div class="kanji-meaning">{{ kanji.meaning }}</div>
               </div>
             </div>
             
-            <!-- Static Japanese text elements - reduced -->
+            <!-- Decorative text -->
             <div class="decorative-text text-1">文法</div>
             <div class="decorative-text text-2">単語</div>
             <div class="decorative-text text-3">会話</div>
@@ -120,36 +127,19 @@ onMounted(() => {
         </div>
       </div>
       
-      <!-- Features preview - optimized -->
-      <div class="features-preview slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.4s;">
+      <!-- Features preview -->
+      <div class="features-section slide-up-fade" :class="{ 'element-visible': textVisible }" style="transition-delay: 0.4s;">
         <div class="features-grid">
-          <div class="feature-item">
+          <div 
+            v-for="(feature, index) in featureIcons" 
+            :key="index"
+            class="feature-card"
+            :class="`feature-${index + 1}`">
             <div class="feature-icon-wrapper">
-              <GraduationCap class="feature-icon" />
+              <component :is="feature.icon" class="feature-icon" />
             </div>
-            <div class="feature-title">All Levels</div>
-            <div class="feature-desc">From beginner to pro</div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-wrapper">
-              <Target class="feature-icon" />
-            </div>
-            <div class="feature-title">Gamified Learning</div>
-            <div class="feature-desc">Fun interactive games</div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-wrapper">
-              <BookOpen class="feature-icon" />
-            </div>
-            <div class="feature-title">Mojidex</div>
-            <div class="feature-desc">Your kanji companion</div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-wrapper">
-              <TrendingUp class="feature-icon" />
-            </div>
-            <div class="feature-title">Track Progress</div>
-            <div class="feature-desc">Real-time analytics</div>
+            <div class="feature-title">{{ feature.title }}</div>
+            <div class="feature-desc">{{ feature.desc }}</div>
           </div>
         </div>
       </div>
@@ -158,24 +148,27 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Base colors */
-:root {
-  --color-cream: #EFD9CE;
-  --color-lavender: #DEC0F1;
-  --color-teal: #50C5B7;
-  --color-blue: #496DDB;
-  --color-dark-green: #14342B;
-}
-
-/* Hero section background - static only */
-.hero-background {
-  background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-blue) 100%);
+/* Section principale */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
+  padding-top: 5rem;
+  
+  /* Mode clair */
+  background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-blue) 100%);
 }
 
-/* Static ambient light - no animation */
-.hero-background::before {
+/* Mode sombre - fond plus sombre et contrasté */
+.dark .hero-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+/* Background effects */
+.hero-section::before {
   content: '';
   position: absolute;
   top: -10%;
@@ -190,17 +183,83 @@ onMounted(() => {
   z-index: 0;
 }
 
-/* Static symbols - optimized */
+.dark .hero-section::before {
+  background: 
+    radial-gradient(circle at 75% 25%, rgba(80, 197, 183, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 25% 75%, rgba(73, 109, 219, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(222, 192, 241, 0.2) 0%, transparent 70%);
+  opacity: 1;
+}
+
+/* Background symbols */
+.hero-bg-symbols {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
 .symbol-static {
+  position: absolute;
   opacity: 0.1;
   font-family: "Noto Sans JP", sans-serif;
   font-weight: 600;
   user-select: none;
-  z-index: 0;
   text-shadow: 0 0 8px rgba(222, 192, 241, 0.2);
+  transition: opacity 0.3s ease;
 }
 
-/* Hero text styles */
+.dark .symbol-static {
+  opacity: 0.15;
+  text-shadow: 0 0 12px rgba(222, 192, 241, 0.4);
+}
+
+/* Container */
+.hero-container {
+  position: relative;
+  z-index: 10;
+  padding: 0 1.5rem;
+  margin: 0 auto;
+  max-width: 80rem;
+  width: 100%;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .hero-content {
+    flex-direction: row;
+  }
+}
+
+/* Text section */
+.hero-text-section {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .hero-text-section {
+    width: 50%;
+  }
+}
+
+.hero-text-content {
+  padding-right: 0;
+  space-y: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .hero-text-content {
+    padding-right: 4rem;
+  }
+}
+
+/* Titre */
 .hero-title {
   font-size: 3.5rem;
   line-height: 1.1;
@@ -216,7 +275,16 @@ onMounted(() => {
   }
 }
 
-.gradient-text {
+.dark .hero-title {
+  color: #f8fafc;
+  text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+}
+
+.hero-title-line {
+  display: block;
+}
+
+.hero-title-gradient {
   background: linear-gradient(135deg, #50C5B7 20%, #DEC0F1 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -228,16 +296,42 @@ onMounted(() => {
   font-weight: 900;
 }
 
+.dark .hero-title-gradient {
+  background: linear-gradient(135deg, #22d3ee 20%, #c084fc 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9)) drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.7));
+}
+
+/* Sous-titre */
 .hero-subtitle {
   font-size: 1.25rem;
   line-height: 1.6;
   font-weight: 400;
   color: var(--color-cream);
   max-width: 600px;
+  margin-bottom: 2rem;
 }
 
-/* Button styles - simplified */
-.primary-button {
+.dark .hero-subtitle {
+  color: #cbd5e1;
+}
+
+/* Boutons */
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .hero-buttons {
+    flex-direction: row;
+  }
+}
+
+.btn-primary {
   padding: 1rem 2rem;
   border-radius: 4px;
   font-weight: 600;
@@ -249,13 +343,23 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-.primary-button:hover {
+.btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(80, 197, 183, 0.4);
   filter: brightness(1.05);
 }
 
-.secondary-button {
+.dark .btn-primary {
+  background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+  color: #0f172a;
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.4);
+}
+
+.dark .btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.5);
+}
+
+.btn-secondary {
   padding: 1rem 2rem;
   border-radius: 4px;
   font-weight: 500;
@@ -269,7 +373,7 @@ onMounted(() => {
   box-shadow: 0 4px 15px rgba(73, 109, 219, 0.2);
 }
 
-.secondary-button:hover {
+.btn-secondary:hover {
   background-color: rgba(222, 192, 241, 0.3);
   border-color: var(--color-teal);
   color: white;
@@ -277,8 +381,33 @@ onMounted(() => {
   box-shadow: 0 6px 20px rgba(73, 109, 219, 0.3);
 }
 
-/* Kanji display styles - optimized */
-.display-container {
+.dark .btn-secondary {
+  border-color: #c084fc;
+  color: #f8fafc;
+  background-color: rgba(192, 132, 252, 0.2);
+  box-shadow: 0 4px 15px rgba(192, 132, 252, 0.3);
+}
+
+.dark .btn-secondary:hover {
+  background-color: rgba(192, 132, 252, 0.3);
+  border-color: #22d3ee;
+  box-shadow: 0 6px 20px rgba(192, 132, 252, 0.4);
+}
+
+/* Visual section */
+.hero-visual-section {
+  width: 100%;
+  margin-top: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .hero-visual-section {
+    width: 50%;
+    margin-top: 0;
+  }
+}
+
+.visual-container {
   position: relative;
   width: 100%;
   height: 400px;
@@ -287,7 +416,8 @@ onMounted(() => {
   align-items: center;
 }
 
-.circle-background-static {
+/* Circle background */
+.circle-bg {
   width: 400px;
   height: 400px;
   border-radius: 50%;
@@ -301,6 +431,12 @@ onMounted(() => {
   opacity: 0.8;
 }
 
+.dark .circle-bg {
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.4) 0%, rgba(168, 85, 247, 0.2) 70%);
+  opacity: 1;
+}
+
+/* Kanji display */
 .kanji-display {
   position: relative;
   width: 200px;
@@ -308,7 +444,6 @@ onMounted(() => {
   z-index: 2;
 }
 
-/* Optimized kanji card transitions */
 .kanji-card {
   position: absolute;
   top: 50%;
@@ -326,11 +461,13 @@ onMounted(() => {
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
+  will-change: transform, opacity;
 }
 
 .kanji-card.active {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1) rotate(0);
+  will-change: auto;
 }
 
 .kanji-card:nth-child(1).active {
@@ -345,7 +482,12 @@ onMounted(() => {
   transform: translate(calc(-50% + 80px), calc(-50% + 40px)) scale(1) rotate(5deg);
 }
 
-.kanji-character {
+.dark .kanji-card {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.kanji-char {
   font-size: 3rem;
   font-weight: bold;
   color: #ffffff;
@@ -361,7 +503,7 @@ onMounted(() => {
   letter-spacing: 0.05em;
 }
 
-/* Static decorative text */
+/* Decorative text */
 .decorative-text {
   position: absolute;
   font-family: "Noto Sans JP", sans-serif;
@@ -371,11 +513,21 @@ onMounted(() => {
   text-shadow: 0 2px 10px rgba(80, 197, 183, 0.5);
 }
 
+.dark .decorative-text {
+  color: #f8fafc;
+  opacity: 0.3;
+  text-shadow: 0 2px 15px rgba(34, 211, 238, 0.7);
+}
+
 .text-1 {
   font-size: 1.8rem;
   top: 20%;
   right: 10%;
   color: rgba(222, 192, 241, 0.8);
+}
+
+.dark .text-1 {
+  color: rgba(192, 132, 252, 0.9);
 }
 
 .text-2 {
@@ -385,6 +537,10 @@ onMounted(() => {
   color: rgba(80, 197, 183, 0.8);
 }
 
+.dark .text-2 {
+  color: rgba(34, 211, 238, 0.9);
+}
+
 .text-3 {
   font-size: 2rem;
   top: 60%;
@@ -392,8 +548,12 @@ onMounted(() => {
   color: rgba(73, 109, 219, 0.8);
 }
 
-/* Features preview - optimized */
-.features-preview {
+.dark .text-3 {
+  color: rgba(168, 85, 247, 0.9);
+}
+
+/* Features section */
+.features-section {
   margin-top: 2.5rem;
   width: 100%;
   margin-bottom: 2rem;
@@ -408,11 +568,11 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-.feature-item {
+/* Feature cards avec adaptation dark mode */
+.feature-card {
   flex: 1;
   min-width: 180px;
   padding: 1.5rem 1.2rem;
-  background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.8));
   border-radius: 12px;
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -420,34 +580,61 @@ onMounted(() => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   position: relative;
   margin-bottom: 5px;
+  will-change: transform;
 }
 
-.feature-item:nth-child(1) {
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+  will-change: auto;
+}
+
+/* Styles spécifiques par feature */
+.feature-1 {
   background: linear-gradient(to bottom right, var(--color-cream), rgba(73, 109, 219, 0.2));
   border-color: rgba(73, 109, 219, 0.6);
 }
 
-.feature-item:nth-child(2) {
+.dark .feature-1 {
+  background: linear-gradient(to bottom right, #334155, rgba(168, 85, 247, 0.3));
+  border-color: rgba(168, 85, 247, 0.7);
+}
+
+.feature-2 {
   background: linear-gradient(to bottom right, var(--color-cream), rgba(80, 197, 183, 0.2));
   border-color: rgba(80, 197, 183, 0.6);
 }
 
-.feature-item:nth-child(3) {
+.dark .feature-2 {
+  background: linear-gradient(to bottom right, #334155, rgba(34, 211, 238, 0.3));
+  border-color: rgba(34, 211, 238, 0.7);
+}
+
+.feature-3 {
   background: linear-gradient(to bottom right, var(--color-cream), rgba(222, 192, 241, 0.2));
   border-color: rgba(222, 192, 241, 0.6);
 }
 
-.feature-item:nth-child(4) {
+.dark .feature-3 {
+  background: linear-gradient(to bottom right, #334155, rgba(192, 132, 252, 0.3));
+  border-color: rgba(192, 132, 252, 0.7);
+}
+
+.feature-4 {
   background: linear-gradient(to bottom right, var(--color-cream), rgba(239, 217, 206, 0.2));
   border-color: rgba(239, 217, 206, 0.6);
 }
 
-.feature-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+.dark .feature-4 {
+  background: linear-gradient(to bottom right, #334155, rgba(251, 146, 60, 0.3));
+  border-color: rgba(251, 146, 60, 0.7);
 }
 
-/* Icon wrapper for better styling */
+.dark .feature-card:hover {
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon wrapper */
 .feature-icon-wrapper {
   display: inline-flex;
   align-items: center;
@@ -460,10 +647,19 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.dark .feature-icon-wrapper {
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .feature-icon {
   width: 28px;
   height: 28px;
   color: var(--color-dark-green);
+}
+
+.dark .feature-icon {
+  color: #f8fafc;
 }
 
 .feature-title {
@@ -474,6 +670,10 @@ onMounted(() => {
   margin-bottom: 0.3rem;
 }
 
+.dark .feature-title {
+  color: #f8fafc;
+}
+
 .feature-desc {
   font-size: 0.85rem;
   color: rgba(20, 52, 43, 0.8);
@@ -481,7 +681,11 @@ onMounted(() => {
   font-weight: 500;
 }
 
-/* Animation utilities - optimized */
+.dark .feature-desc {
+  color: rgba(248, 250, 252, 0.7);
+}
+
+/* Animations */
 .slide-up-fade {
   opacity: 0;
   transform: translateY(30px);
@@ -493,37 +697,20 @@ onMounted(() => {
   transform: translateY(0);
 }
 
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 640px) {
   .features-grid {
     gap: 1rem;
   }
   
-  .feature-item {
+  .feature-card {
     min-width: calc(50% - 0.5rem);
   }
 }
 
 @media (max-width: 400px) {
-  .feature-item {
+  .feature-card {
     min-width: 100%;
   }
-}
-
-/* Performance optimizations */
-.kanji-card {
-  will-change: transform, opacity;
-}
-
-.kanji-card.active {
-  will-change: auto;
-}
-
-.feature-item {
-  will-change: transform;
-}
-
-.feature-item:hover {
-  will-change: auto;
 }
 </style>

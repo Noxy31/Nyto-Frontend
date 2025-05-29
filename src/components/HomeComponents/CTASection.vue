@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { Sparkles, Smartphone, Play } from 'lucide-vue-next';
 
 // Props
@@ -28,10 +28,10 @@ interface AppBadge {
   store: string;
 }
 
-// Optimized floating elements - reduced count
+// Optimized floating elements - reduced count for performance
 const floatingElements = ref<FloatingElement[]>([]);
 
-// Generate floating elements - optimized
+// Generate floating elements - optimized with better distribution
 const generateFloatingElements = (): void => {
   const elements: FloatingElement[] = [];
   
@@ -39,11 +39,11 @@ const generateFloatingElements = (): void => {
   for (let i = 0; i < 4; i++) {
     elements.push({
       id: i,
-      size: Math.random() * 40 + 25, // Smaller sizes
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: Math.random() * 8 + 12, // Shorter animations
-      delay: Math.random() * 2,
+      size: Math.random() * 30 + 20, // Smaller, more consistent sizes
+      x: Math.random() * 80 + 10, // Avoid edges
+      y: Math.random() * 80 + 10, // Avoid edges
+      duration: Math.random() * 6 + 10, // More consistent animation speed
+      delay: i * 0.5, // Sequential delays for better visual flow
       type: i % 2 === 0 ? 'circle' : 'square'
     });
   }
@@ -67,28 +67,33 @@ const appStoreBadges = ref<AppBadge[]>([
   }
 ]);
 
-// Generate floating elements on mount
+// Simplified hover states - removed unused states
+const buttonHover = ref<{
+  primary: boolean;
+  secondary: boolean;
+}>({
+  primary: false,
+  secondary: false
+});
+
+// Cleanup timeout for performance
+let animationCleanup: (() => void) | null = null;
+
+// Lifecycle optimized
 onMounted(() => {
   generateFloatingElements();
 });
 
-// Simplified hover states
-const buttonHover = ref<{
-  primary: boolean;
-  secondary: boolean;
-  badge: number | null;
-}>({
-  primary: false,
-  secondary: false,
-  badge: null
+onUnmounted(() => {
+  if (animationCleanup) {
+    animationCleanup();
+    animationCleanup = null;
+  }
 });
 
+// Simplified hover handlers
 const setButtonHover = (type: 'primary' | 'secondary', value: boolean): void => {
   buttonHover.value[type] = value;
-};
-
-const setBadgeHover = (index: number | null): void => {
-  buttonHover.value.badge = index;
 };
 </script>
 
@@ -121,14 +126,14 @@ const setBadgeHover = (index: number | null): void => {
         </div>
         
         <!-- Main heading -->
-        <h2 class="text-4xl md:text-6xl font-extrabold mb-8 transition-all duration-600 transform text-white"
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-8 transition-all duration-600 transform cta-heading"
             :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
             style="transition-delay: 0.1s; line-height: 1.1;">
           Start Your <span class="gradient-text">Japanese Adventure</span>
         </h2>
         
         <!-- Description text -->
-        <p class="text-xl md:text-2xl mb-12 transition-all duration-600 transform text-white opacity-90"
+        <p class="text-xl md:text-2xl mb-12 transition-all duration-600 transform cta-description"
            :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
            style="transition-delay: 0.2s;">
           Get full access to all features for 3 days free, then decide if Nyto is right for you.
@@ -156,7 +161,7 @@ const setBadgeHover = (index: number | null): void => {
         </div>
         
         <!-- Disclaimer text -->
-        <p class="mt-8 transition-all duration-600 transform text-white opacity-70 text-sm"
+        <p class="mt-8 transition-all duration-600 transform cta-disclaimer"
            :class="props.isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
            style="transition-delay: 0.4s;">
           No credit card required. Cancel anytime.
@@ -170,10 +175,7 @@ const setBadgeHover = (index: number | null): void => {
         
         <div v-for="(badge, index) in appStoreBadges"
              :key="badge.name"
-             class="app-store-badge relative cursor-not-allowed"
-             :class="{ 'scale-105': buttonHover.badge === index }"
-             @mouseenter="setBadgeHover(index)"
-             @mouseleave="setBadgeHover(null)">
+             class="app-store-badge relative cursor-not-allowed">
           <div class="flex items-center space-x-3">
             <div class="badge-icon-wrapper">
               <component :is="badge.icon" class="badge-icon" />
@@ -202,10 +204,21 @@ const setBadgeHover = (index: number | null): void => {
             <stop offset="75%" style="stop-color:#496DDB;stop-opacity:1" />
             <stop offset="100%" style="stop-color:#EFD9CE;stop-opacity:1" />
           </linearGradient>
+          <linearGradient id="waveGradientDark" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+            <stop offset="25%" style="stop-color:#374151;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#4b5563;stop-opacity:1" />
+            <stop offset="75%" style="stop-color:#6b7280;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1f2937;stop-opacity:1" />
+          </linearGradient>
         </defs>
         <path d="M0,96L40,112C80,128,160,160,240,160C320,160,400,128,480,122.7C560,117,640,139,720,133.3C800,128,880,96,960,90.7C1040,85,1120,107,1200,117.3C1280,128,1360,128,1400,128L1440,128L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z" 
               fill="url(#waveGradient)" 
               class="wave-path">
+          <animate attributeName="fill" 
+            values="url(#waveGradient);url(#waveGradient);url(#waveGradient)"
+            dur="1s"
+            repeatCount="1" />
           <animate attributeName="d" 
             values="M0,96L40,112C80,128,160,160,240,160C320,160,400,128,480,122.7C560,117,640,139,720,133.3C800,128,880,96,960,90.7C1040,85,1120,107,1200,117.3C1280,128,1360,128,1400,128L1440,128L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z;
                    M0,128L40,122.7C80,117,160,107,240,101.3C320,96,400,96,480,112C560,128,640,160,720,170.7C800,181,880,171,960,149.3C1040,128,1120,96,1200,96C1280,96,1360,128,1400,144L1440,160L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z;
@@ -228,7 +241,7 @@ const setBadgeHover = (index: number | null): void => {
   --color-dark-green: #14342B;
 }
 
-/* Dark background */
+/* Section background with dark mode support */
 .cta-section {
   background: linear-gradient(180deg, 
     #14342B 0%,
@@ -239,6 +252,17 @@ const setBadgeHover = (index: number | null): void => {
     #306261 100%
   );
   position: relative;
+}
+
+.dark .cta-section {
+  background: linear-gradient(180deg, 
+    #0f172a 0%,
+    #1e293b 20%,
+    #334155 40%,
+    #475569 60%,
+    #64748b 80%,
+    #94a3b8 100%
+  );
 }
 
 /* Optimized floating animation */
@@ -253,6 +277,8 @@ const setBadgeHover = (index: number | null): void => {
 
 .animate-float {
   animation: float ease-in-out infinite;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .floating-element {
@@ -261,13 +287,38 @@ const setBadgeHover = (index: number | null): void => {
   filter: blur(0.5px);
 }
 
+.dark .floating-element {
+  background: linear-gradient(45deg, rgba(56, 178, 172, 0.15), rgba(167, 139, 250, 0.15));
+}
+
 .floating-element.circle {
   border-radius: 50%;
 }
 
-/* Typography */
-.text-white {
+/* Typography with dark mode support */
+.cta-heading {
   color: white;
+}
+
+.dark .cta-heading {
+  color: #f8fafc;
+}
+
+.cta-description {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dark .cta-description {
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.cta-disclaimer {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+}
+
+.dark .cta-disclaimer {
+  color: rgba(248, 250, 252, 0.6);
 }
 
 .gradient-text {
@@ -280,15 +331,28 @@ const setBadgeHover = (index: number | null): void => {
   font-weight: 900;
 }
 
-/* Offer tag - WHITE TEXT */
+.dark .gradient-text {
+  background: linear-gradient(135deg, #38b2ac 20%, #a78bfa 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Offer tag with dark mode support */
 .offer-tag {
   background-color: rgba(80, 197, 183, 0.15);
-  color: white; /* Texte en blanc */
+  color: white;
   border: 1px solid rgba(80, 197, 183, 0.3);
   backdrop-filter: blur(10px);
 }
 
-/* Buttons */
+.dark .offer-tag {
+  background-color: rgba(56, 178, 172, 0.2);
+  color: #f8fafc;
+  border: 1px solid rgba(56, 178, 172, 0.4);
+}
+
+/* Buttons with dark mode support */
 .primary-button {
   padding: 1rem 2.5rem;
   border-radius: 50px;
@@ -299,12 +363,23 @@ const setBadgeHover = (index: number | null): void => {
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
   border: 2px solid transparent;
+  will-change: transform;
 }
 
 .primary-button:hover {
   box-shadow: 0 8px 25px rgba(80, 197, 183, 0.4);
   filter: brightness(1.1);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dark .primary-button {
+  background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
+  box-shadow: 0 4px 15px rgba(56, 178, 172, 0.3);
+}
+
+.dark .primary-button:hover {
+  box-shadow: 0 8px 25px rgba(56, 178, 172, 0.4);
+  border-color: rgba(248, 250, 252, 0.3);
 }
 
 .secondary-button {
@@ -316,6 +391,7 @@ const setBadgeHover = (index: number | null): void => {
   color: white;
   background-color: transparent;
   transition: all 0.3s ease;
+  will-change: transform;
 }
 
 .secondary-button:hover {
@@ -324,7 +400,18 @@ const setBadgeHover = (index: number | null): void => {
   box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
 }
 
-/* App Store badges */
+.dark .secondary-button {
+  border: 2px solid #f8fafc;
+  color: #f8fafc;
+}
+
+.dark .secondary-button:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+  box-shadow: 0 8px 20px rgba(248, 250, 252, 0.3);
+}
+
+/* App Store badges with dark mode support */
 .app-store-badge {
   background-color: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -339,6 +426,12 @@ const setBadgeHover = (index: number | null): void => {
   opacity: 0.6;
 }
 
+.dark .app-store-badge {
+  background-color: rgba(248, 250, 252, 0.08);
+  border: 1px solid rgba(248, 250, 252, 0.15);
+  color: #f8fafc;
+}
+
 .badge-icon-wrapper {
   display: flex;
   align-items: center;
@@ -349,10 +442,18 @@ const setBadgeHover = (index: number | null): void => {
   border-radius: 8px;
 }
 
+.dark .badge-icon-wrapper {
+  background: rgba(248, 250, 252, 0.12);
+}
+
 .badge-icon {
   width: 24px;
   height: 24px;
   color: white;
+}
+
+.dark .badge-icon {
+  color: #f8fafc;
 }
 
 .coming-soon-overlay {
@@ -372,11 +473,16 @@ const setBadgeHover = (index: number | null): void => {
   transition: opacity 0.3s ease;
 }
 
+.dark .coming-soon-overlay {
+  background: rgba(15, 23, 42, 0.95);
+  color: #38b2ac;
+}
+
 .app-store-badge:hover .coming-soon-overlay {
   opacity: 1;
 }
 
-/* Wave animation */
+/* Wave animation with dark mode support */
 .wave-container {
   position: relative;
   bottom: 0;
@@ -392,6 +498,14 @@ const setBadgeHover = (index: number | null): void => {
   width: 100%;
   height: 100px;
   transform: translateZ(0);
+}
+
+.wave-path {
+  fill: url(#waveGradient);
+}
+
+.dark .wave-path {
+  fill: url(#waveGradientDark);
 }
 
 /* Responsive adjustments */
@@ -414,22 +528,6 @@ const setBadgeHover = (index: number | null): void => {
   .wave {
     height: 80px;
   }
-}
-
-/* Performance optimizations */
-.floating-element {
-  will-change: transform;
-  transform: translateZ(0);
-}
-
-.primary-button,
-.secondary-button {
-  will-change: transform;
-}
-
-.primary-button:hover,
-.secondary-button:hover {
-  will-change: auto;
 }
 
 /* Reduce motion for accessibility */

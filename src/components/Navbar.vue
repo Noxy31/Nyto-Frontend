@@ -1,93 +1,175 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue';
-import { Home, Star, Library, Tag, LogIn } from 'lucide-vue-next';
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { Home, Star, Library, Tag, LogIn } from 'lucide-vue-next'
+import LightSwitch from '@/components/LightSwitch.vue'
 
-// Props
+// Props & Emits
 interface NavbarProps {
-  scrollY: number;
+  scrollY: number
 }
+const props = defineProps<NavbarProps>()
+const emit = defineEmits<{ (e: 'navigate', section: string): void }>()
 
-const props = defineProps<NavbarProps>();
+// States
+const isMenuOpen = ref(false)
+const activeSection = ref('hero')
+const showHeader = ref(true)
+const lastScrollPosition = ref(0)
+const isScrolled = ref(false)
+const isNavigating = ref(false)
 
-// Emits
-const emit = defineEmits<{
-  (e: 'navigate', section: string): void;
-}>();
+// Optimisation: utiliser des variables plutôt que des refs pour les timeouts
+let navigationTimeout: ReturnType<typeof setTimeout> | null = null
+let sectionObserver: IntersectionObserver | null = null
 
-// States - avec ajout pour gérer le scroll programmatique
-const isMenuOpen = ref(false);
-const activeSection = ref('hero');
-const showHeader = ref(true);
-const lastScrollPosition = ref(0);
-const isScrolled = ref(false);
-
-// NOUVEAUX ÉTATS pour gérer le scroll automatique
-const isNavigating = ref(false);
-const navigationTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
-
-// Methods
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
-};
-
-const setActiveSection = (section: string) => {
-  activeSection.value = section;
-  isMenuOpen.value = false;
-  
-  // MARQUER QU'ON EST EN NAVIGATION AUTOMATIQUE
-  isNavigating.value = true;
-  
-  // Nettoyer le timeout précédent si il existe
-  if (navigationTimeout.value) {
-    clearTimeout(navigationTimeout.value);
-  }
-  
-  // Émettre l'événement de navigation
-  emit('navigate', section);
-  
-  // DÉLAI pour permettre au scroll de se terminer
-  navigationTimeout.value = setTimeout(() => {
-    isNavigating.value = false;
-  }, 1500);
-};
-
-// WATCHER MODIFIÉ pour ignorer le scroll pendant la navigation
-watch(() => props.scrollY, (newVal) => {
-  isScrolled.value = newVal > 50;
-  
-  // SI ON EST EN NAVIGATION AUTOMATIQUE, ne pas cacher la navbar
-  if (isNavigating.value) {
-    showHeader.value = true;
-  } else {
-    // COMPORTEMENT NORMAL pour le scroll manuel
-    if (newVal > lastScrollPosition.value && newVal > 100) {
-      showHeader.value = false;
-    } else {
-      showHeader.value = true;
-    }
-  }
-  
-  lastScrollPosition.value = newVal;
-});
-
-// Static navigation items
+// Optimisation: constante pour éviter les recalculs
+const SECTIONS = ['hero', 'features', 'showcase', 'action'] as const
 const navItems = [
   { id: 'hero', label: 'Home', icon: Home },
   { id: 'features', label: 'Features', icon: Star },
   { id: 'showcase', label: 'Mojidex', icon: Library },
   { id: 'action', label: 'Pricing', icon: Tag }
-];
+] as const
 
-// CLEANUP au démontage
-onUnmounted(() => {
-  if (navigationTimeout.value) {
-    clearTimeout(navigationTimeout.value);
+// Methods
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value
+}
+
+const setActiveSection = (section: string) => {
+  activeSection.value = section
+  isMenuOpen.value = false
+  isNavigating.value = true
+  
+  // Optimisation: nettoyer avant de créer un nouveau timeout
+  if (navigationTimeout) {
+    clearTimeout(navigationTimeout)
+    navigationTimeout = null
   }
-});
-</script>
+  
+  emit('navigate', section)
+  
+  navigationTimeout = setTimeout(() => {
+    isNavigating.value = false
+    navigationTimeout = null
+  }, 1500)
+}
 
-<!-- GARDEZ VOTRE TEMPLATE ET CSS EXISTANTS EXACTEMENT COMME ILS SONT ! -->
-<!-- Je ne modifie QUE le script setup -->
+// Optimisation: fonction de détection plus efficace
+const detectActiveSection = () => {
+  if (isNavigating.value) return
+  
+  const scrollPosition = window.scrollY + 100
+  let currentSection = 'hero'
+  
+  // Optimisation: boucle inverse pour performance
+  for (let i = SECTIONS.length - 1; i >= 0; i--) {
+    const sectionId = SECTIONS[i]
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const rect = element.getBoundingClientRect()
+      const elementTop = window.scrollY + rect.top
+      
+      if (scrollPosition >= elementTop - 200) {
+        currentSection = sectionId
+        break
+      }
+    }
+  }
+  
+  if (activeSection.value !== currentSection) {
+    activeSection.value = currentSection
+  }
+}
+
+// Optimisation: intersection observer avec throttling
+const setupSectionObserver = () => {
+  if (sectionObserver) {
+    sectionObserver.disconnect()
+    sectionObserver = null
+  }
+  
+  sectionObserver = new IntersectionObserver(
+    (entries) => {
+      if (isNavigating.value) return
+      
+      let mostVisibleSection = ''
+      let maxVisibleArea = 0
+      
+      // Optimisation: utiliser for au lieu de forEach
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const visibleArea = entry.intersectionRatio * entry.boundingClientRect.height
+          if (visibleArea > maxVisibleArea) {
+            maxVisibleArea = visibleArea
+            mostVisibleSection = entry.target.id
+          }
+        }
+      }
+      
+      if (mostVisibleSection && activeSection.value !== mostVisibleSection) {
+        activeSection.value = mostVisibleSection
+      }
+    },
+    {
+      threshold: [0.1, 0.3, 0.5, 0.7],
+      rootMargin: '-80px 0px -20% 0px'
+    }
+  )
+  
+  // Optimisation: observer seulement les sections qui existent
+  for (const sectionId of SECTIONS) {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      sectionObserver.observe(element)
+    }
+  }
+}
+
+// Optimisation: watcher avec debouncing implicite
+let scrollTimeout: ReturnType<typeof setTimeout> | null = null
+watch(() => props.scrollY, (newVal) => {
+  // Optimisation: éviter les calculs inutiles
+  const wasScrolled = isScrolled.value
+  isScrolled.value = newVal > 50
+  
+  if (isNavigating.value) {
+    showHeader.value = true
+  } else {
+    // Optimisation: calcul simplifié
+    showHeader.value = newVal <= lastScrollPosition.value || newVal <= 100
+    
+    // Optimisation: debounce la détection de section
+    if (scrollTimeout) clearTimeout(scrollTimeout)
+    scrollTimeout = setTimeout(detectActiveSection, 16) // ~60fps
+  }
+  
+  lastScrollPosition.value = newVal
+})
+
+// Lifecycle optimisé
+onMounted(async () => {
+  // Optimisation: attendre que le DOM soit complètement rendu
+  await nextTick()
+  setTimeout(setupSectionObserver, 100) // Réduit de 500ms à 100ms
+})
+
+onUnmounted(() => {
+  // Optimisation: cleanup complet
+  if (navigationTimeout) {
+    clearTimeout(navigationTimeout)
+    navigationTimeout = null
+  }
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout)
+    scrollTimeout = null
+  }
+  if (sectionObserver) {
+    sectionObserver.disconnect()
+    sectionObserver = null
+  }
+})
+</script>
 
 <template>
   <header 
@@ -132,24 +214,32 @@ onUnmounted(() => {
               <LogIn class="w-4 h-4 mr-2" />
               Log In
             </button>
+            
+            <!-- Theme Switch tout à droite -->
+            <LightSwitch />
           </div>
         </nav>
         
         <!-- Mobile Menu Button -->
-        <button class="md:hidden flex items-center" @click="toggleMenu" aria-label="Toggle menu">
-          <div class="w-6 h-6 flex items-center justify-center relative">
-            <span class="hamburger-line top-line"
-                  :class="{ 'rotate-45 translate-y-0': isMenuOpen }"></span>
-            <span class="hamburger-line middle-line"
-                  :class="{ 'opacity-0': isMenuOpen }"></span>
-            <span class="hamburger-line bottom-line"
-                  :class="{ '-rotate-45 translate-y-0': isMenuOpen }"></span>
-          </div>
-        </button>
+        <div class="md:hidden flex items-center space-x-3">
+          <!-- Theme Switch Mobile -->
+          <LightSwitch />
+          
+          <button class="flex items-center" @click="toggleMenu" aria-label="Toggle menu">
+            <div class="w-6 h-6 flex items-center justify-center relative">
+              <span class="hamburger-line top-line"
+                    :class="{ 'rotate-45 translate-y-0': isMenuOpen }"></span>
+              <span class="hamburger-line middle-line"
+                    :class="{ 'opacity-0': isMenuOpen }"></span>
+              <span class="hamburger-line bottom-line"
+                    :class="{ '-rotate-45 translate-y-0': isMenuOpen }"></span>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
     
-    <!-- Beautiful gradient border - KEPT ORIGINAL -->
+    <!-- Beautiful gradient border -->
     <div class="absolute bottom-0 left-0 right-0 h-[3px] navbar-gradient-border"></div>
     
     <!-- Mobile Navigation -->
@@ -195,6 +285,11 @@ onUnmounted(() => {
 header {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.dark header {
+  background: rgba(31, 41, 55, 0.7);
 }
 
 .nav-scrolled {
@@ -202,7 +297,12 @@ header {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* Gradient border - ORIGINAL ANIMATION KEPT */
+.dark .nav-scrolled {
+  background: rgba(31, 41, 55, 0.85);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient border */
 .navbar-gradient-border {
   background: linear-gradient(90deg, #50C5B7 0%, #DEC0F1 25%, #496DDB 50%, #EFD9CE 75%, #50C5B7 100%);
   animation: borderGradient 8s ease infinite;
@@ -215,10 +315,11 @@ header {
   100% { background-position: 0% 50%; }
 }
 
-/* Navigation items - minimal CSS */
+/* Navigation items */
 .nav-item {
   color: var(--color-dark-green);
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .nav-item:hover {
@@ -230,9 +331,25 @@ header {
   font-weight: 600;
 }
 
+.dark .nav-item {
+  color: white;
+}
+
+.dark .nav-item:hover {
+  color: var(--color-teal);
+}
+
+.dark .nav-item-active {
+  color: white;
+}
+
 .nav-item-bg {
   background-color: rgba(73, 109, 219, 0.1);
   border-radius: 9999px;
+}
+
+.dark .nav-item-bg {
+  background-color: rgba(80, 197, 183, 0.2);
 }
 
 .nav-divider {
@@ -240,12 +357,17 @@ header {
   height: 36px;
 }
 
-/* Buttons - simplified */
+.dark .nav-divider {
+  border-color: rgba(80, 197, 183, 0.5);
+}
+
+/* Buttons */
 .nav-cta-button {
   background: linear-gradient(135deg, var(--color-teal) 0%, #3da89b 100%);
   color: var(--color-dark-green);
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
+  transition: all 0.3s ease;
 }
 
 .nav-cta-button:hover {
@@ -253,11 +375,16 @@ header {
   filter: brightness(1.05);
 }
 
+.dark .nav-cta-button {
+  color: white;
+}
+
 .nav-login-button {
   background: transparent;
   border: 2px solid var(--color-lavender);
   color: var(--color-dark-green);
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .nav-login-button:hover {
@@ -266,12 +393,30 @@ header {
   box-shadow: 0 4px 12px rgba(222, 192, 241, 0.3);
 }
 
+.dark .nav-login-button {
+  border-color: var(--color-teal);
+  color: white;
+}
+
+.dark .nav-login-button:hover {
+  background-color: rgba(80, 197, 183, 0.2);
+  border-color: var(--color-lavender);
+  box-shadow: 0 4px 12px rgba(80, 197, 183, 0.3);
+}
+
 /* Mobile menu */
 .mobile-menu {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(8px);
   border-top: 1px solid rgba(80, 197, 183, 0.3);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.dark .mobile-menu {
+  background: rgba(31, 41, 55, 0.9);
+  border-top: 1px solid rgba(80, 197, 183, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .mobile-nav-item {
@@ -279,6 +424,7 @@ header {
   background-color: rgba(80, 197, 183, 0.1);
   border-left: 3px solid transparent;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .mobile-nav-item:hover {
@@ -293,11 +439,28 @@ header {
   border-left: 3px solid var(--color-blue);
 }
 
+.dark .mobile-nav-item {
+  color: white;
+  background-color: rgba(80, 197, 183, 0.15);
+}
+
+.dark .mobile-nav-item:hover {
+  background-color: rgba(80, 197, 183, 0.25);
+  border-left: 3px solid var(--color-teal);
+}
+
+.dark .mobile-nav-active {
+  color: white;
+  background: linear-gradient(to right, rgba(80, 197, 183, 0.3), rgba(55, 65, 81, 0.3));
+  border-left: 3px solid var(--color-teal);
+}
+
 .mobile-cta {
   background: linear-gradient(135deg, var(--color-teal) 0%, #3da89b 100%);
   color: var(--color-dark-green);
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
+  transition: all 0.3s ease;
 }
 
 .mobile-cta:hover {
@@ -305,11 +468,16 @@ header {
   transform: scale(1.02);
 }
 
+.dark .mobile-cta {
+  color: white;
+}
+
 .mobile-login {
   background: transparent;
   border: 2px solid var(--color-lavender);
   color: var(--color-dark-green);
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .mobile-login:hover {
@@ -317,6 +485,17 @@ header {
   border-color: var(--color-teal);
   box-shadow: 0 4px 12px rgba(222, 192, 241, 0.3);
   transform: scale(1.02);
+}
+
+.dark .mobile-login {
+  border-color: var(--color-teal);
+  color: white;
+}
+
+.dark .mobile-login:hover {
+  background-color: rgba(80, 197, 183, 0.2);
+  border-color: var(--color-lavender);
+  box-shadow: 0 4px 12px rgba(80, 197, 183, 0.3);
 }
 
 /* Hamburger icon */
@@ -328,6 +507,10 @@ header {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: var(--color-dark-green);
   border-radius: 2px;
+}
+
+.dark .hamburger-line {
+  background-color: white;
 }
 
 .top-line {
