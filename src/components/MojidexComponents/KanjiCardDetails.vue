@@ -57,14 +57,65 @@ const rarityConfig = {
     bgGradient: 'linear-gradient(135deg, #ffffff 0%, #f8faff 30%, #f0f4ff 60%, #e8f1ff 100%)'
   },
   legendary: { 
-    color: '#DEC0F1',
+    color: 'linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%)',
     bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fdf9ff 30%, #faf2ff 60%, #f5e8ff 100%)'
   },
   mythic: { 
-    color: '#FFD700',
+    color: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%)',
     bgGradient: 'linear-gradient(135deg, #ffffff 0%, #fffdf5 30%, #fffaeb 60%, #fff4d6 100%)'
   }
 };
+
+// COULEURS KANJI DYNAMIQUES PAR RARETÉ
+const kanjiColor = computed(() => {
+  switch (props.kanji.rarity) {
+    case 'common':
+      return '#50C5B7';
+    case 'rare':
+      return '#496DDB';
+    case 'legendary':
+      return 'transparent'; // Pour le dégradé
+    case 'mythic':
+      return 'transparent'; // Pour le dégradé
+    default:
+      return props.kanji.color;
+  }
+});
+
+const kanjiStyle = computed(() => {
+  const baseStyle = {
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+  };
+
+  if (props.kanji.rarity === 'legendary') {
+    return {
+      ...baseStyle,
+      background: 'linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      filter: 'drop-shadow(0 2px 4px rgba(139, 95, 184, 0.3))'
+    };
+  }
+
+  if (props.kanji.rarity === 'mythic') {
+    return {
+      ...baseStyle,
+      background: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      backgroundSize: '200% 200%',
+      animation: 'mythicKanjiGlow 4s ease infinite',
+      filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))'
+    };
+  }
+
+  return {
+    ...baseStyle,
+    color: kanjiColor.value
+  };
+});
 
 const cardStyle = computed(() => ({
   background: rarityConfig[props.kanji.rarity].bgGradient,
@@ -80,7 +131,6 @@ interface HexagonConfig {
 
 // Configuration des hexagones par rareté - UN SEUL hexagone au centre
 const hexagonConfig = computed((): HexagonConfig[] => {
-  // Toutes les raretés ont UN SEUL hexagone au centre
   return [{ position: 'center', delay: 0 }];
 });
 
@@ -148,7 +198,7 @@ const handleClose = () => {
       <!-- Flip Container -->
       <div 
         class="relative w-full min-h-[520px] transition-all duration-1000 ease-out flip-container"
-        :class="{ 'flipped': isFlipped }"
+        :class="[{ 'flipped': isFlipped }, kanji.rarity]"
         :style="{ height: 'min(88vh, 700px)', transformStyle: 'preserve-3d' }"
       >
         <!-- FRONT FACE -->
@@ -172,7 +222,8 @@ const handleClose = () => {
             <!-- Rarity Badge -->
             <div 
               class="absolute top-4 right-4 px-4 py-2 rounded-2xl text-sm font-bold uppercase text-white z-20 shadow-xl flex items-center gap-2"
-              :style="{ backgroundColor: rarityConfig[kanji.rarity].color }"
+              :class="{ 'mythic-badge': kanji.rarity === 'mythic', 'legendary-badge': kanji.rarity === 'legendary' }"
+              :style="kanji.rarity !== 'mythic' && kanji.rarity !== 'legendary' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}"
             >
               <Sparkles class="w-4 h-4" />
               {{ kanji.rarity }}
@@ -194,11 +245,8 @@ const handleClose = () => {
             <!-- Character Display -->
             <div class="text-center flex-1 flex flex-col justify-center">
               <div class="flex items-center justify-center gap-4 mb-4">
-                <span class="text-7xl font-black font-japanese" 
-                      :style="{ 
-                        color: kanji.color, 
-                        textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                      }">
+                <span class="text-7xl font-black font-japanese japanese-char" 
+                      :style="kanjiStyle">
                   {{ kanji.japanese }}
                 </span>
               </div>
@@ -243,113 +291,122 @@ const handleClose = () => {
             <!-- Header Section -->
             <div class="flex gap-6 pb-4 border-b-2 border-gray-200 flex-shrink-0">
               <!-- Info Cards -->
-              <div class="flex-1 flex flex-col gap-1.5">
-                <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
-                  <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                    <BookOpen class="w-3 h-3" />
+                <div class="flex-1 flex flex-col gap-1.5">
+                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
+                        :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
+                        :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
+                      <BookOpen class="w-3 h-3" />
+                    </div>
+                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Kunyomi:</span>
+                    <span class="text-slate-800 flex-1 font-japanese text-base font-bold">{{ kanji.kunyomi || 'N/A' }}</span>
                   </div>
-                  <span class="text-slate-700 min-w-[70px] text-sm font-semibold">Kunyomi:</span>
-                  <span class="text-slate-700 flex-1 font-japanese text-sm">{{ kanji.kunyomi || 'N/A' }}</span>
-                </div>
-                
-                <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
-                  <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                    <BookOpen class="w-3 h-3" />
+                  
+                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
+                        :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
+                        :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
+                      <BookOpen class="w-3 h-3" />
+                    </div>
+                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Onyomi:</span>
+                    <span class="text-slate-800 flex-1 font-japanese text-base font-bold">{{ kanji.onyomi || 'N/A' }}</span>
                   </div>
-                  <span class="text-slate-700 min-w-[70px] text-sm font-semibold">Onyomi:</span>
-                  <span class="text-slate-700 flex-1 font-japanese text-sm">{{ kanji.onyomi || 'N/A' }}</span>
-                </div>
-                
-                <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
-                  <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                    <Sparkles class="w-3 h-3" />
+                  
+                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
+                        :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
+                        :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
+                      <Sparkles class="w-3 h-3" />
+                    </div>
+                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Meaning:</span>
+                    <span class="text-slate-800 flex-1 text-base font-bold">{{ kanji.meaning || 'N/A' }}</span>
                   </div>
-                  <span class="text-slate-700 min-w-[70px] text-sm font-semibold">Meaning:</span>
-                  <span class="text-slate-700 flex-1 text-sm">{{ kanji.meaning || 'N/A' }}</span>
-                </div>
-                
-                <div v-if="kanji.radical" class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
-                  <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                    <span class="text-xs font-bold">部</span>
+                  
+                  <div v-if="kanji.radical" class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
+                        :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
+                        :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
+                      <span class="text-xs font-bold">部</span>
+                    </div>
+                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Radical:</span>
+                    <span class="text-slate-800 flex-1 font-japanese text-base font-bold">{{ kanji.radical }}</span>
                   </div>
-                  <span class="text-slate-700 min-w-[70px] text-sm font-semibold">Radical:</span>
-                  <span class="text-slate-700 flex-1 font-japanese text-sm">{{ kanji.radical }}</span>
-                </div>
-                
-                <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
-                  <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                    <svg v-if="kanji.isJoyo" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2z"/>
-                      <path d="M19 11h-4a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2z"/>
-                      <path d="M7 7V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v4"/>
-                    </svg>
-                    <svg v-else class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="8" width="18" height="4" rx="1"/>
-                      <path d="M12 8v13"/>
-                      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
-                    </svg>
+                  
+                  <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-xl border border-white/15">
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold icon-background" 
+                        :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
+                        :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
+                      <svg v-if="kanji.isJoyo" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2z"/>
+                        <path d="M19 11h-4a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2z"/>
+                        <path d="M7 7V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v4"/>
+                      </svg>
+                      <svg v-else class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="8" width="18" height="4" rx="1"/>
+                        <path d="M12 8v13"/>
+                        <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+                      </svg>
+                    </div>
+                    <span class="text-slate-800 min-w-[70px] text-base font-extrabold">Jōyō kanji:</span>
+                    <span class="text-slate-800 flex-1 text-base font-bold" :class="kanji.isJoyo ? 'text-emerald-700' : 'text-red-700'">
+                      {{ kanji.isJoyo ? 'Yes' : 'No' }}
+                    </span>
                   </div>
-                  <span class="text-slate-700 min-w-[70px] text-sm font-semibold">Jōyō kanji:</span>
-                  <span class="text-slate-700 flex-1 text-sm" :class="kanji.isJoyo ? 'text-emerald-600' : 'text-red-600'">
-                    {{ kanji.isJoyo ? 'Yes' : 'No' }}
-                  </span>
                 </div>
-              </div>
               
               <!-- Large Character -->
               <div class="flex-none w-36 flex items-center justify-start pl-2">
-                <div class="text-8xl font-black leading-none font-japanese" 
-                     :style="{ 
-                       color: kanji.color, 
-                       textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                     }">
+                <div class="text-8xl font-black leading-none font-japanese japanese-char" 
+                     :style="kanjiStyle">
                   {{ kanji.japanese }}
                 </div>
               </div>
             </div>
             
             <!-- Compounds Section -->
-            <div v-if="kanji.compounds?.length" class="flex-1 flex flex-col min-h-0">
-              <h3 class="text-xl font-bold text-slate-700 mb-2 pb-2 border-b-2 flex items-center gap-2" :style="{ borderColor: rarityConfig[kanji.rarity].color }">
-                <div class="flex items-center justify-center w-8 h-8 rounded-lg text-white" :style="{ backgroundColor: rarityConfig[kanji.rarity].color }">
-                  <BookOpen class="w-4 h-4" />
-                </div>
-                Compounds & Usage
-              </h3>
-              
-              <div class="flex-1 overflow-y-auto custom-scroll">
-                <div class="flex flex-col gap-3 pr-3 pt-2">
-                  <div 
-                    v-for="(compound, index) in kanji.compounds" 
-                    :key="index"
-                    class="bg-white/20 border border-white/20 rounded-2xl p-4 opacity-0 -translate-x-4 transition-all duration-300"
-                    :class="{ 'opacity-100 translate-x-0': contentVisible }"
-                    :style="{ transitionDelay: `${index * 0.1}s` }"
-                  >
-                    <div class="flex items-center gap-3 mb-3 pb-2 border-b border-white/15">
-                      <div class="text-2xl font-black font-japanese text-gray-800">{{ compound.kanji }}</div>
-                      <div class="text-lg font-semibold text-slate-700">{{ compound.reading }}</div>
-                    </div>
-                    
-                    <div class="space-y-2">
-                      <div class="text-sm text-slate-700">
-                        <span class="font-bold text-slate-600 mr-2">Meaning:</span>
-                        {{ compound.meaning }}
+              <div v-if="kanji.compounds?.length" class="flex-1 flex flex-col min-h-0">
+                <h3 class="text-2xl font-black text-slate-800 mb-2 pb-2 border-b-2 flex items-center gap-2" :style="{ borderColor: rarityConfig[kanji.rarity].color }">
+                  <div class="flex items-center justify-center w-8 h-8 rounded-lg text-white icon-background-large" 
+                      :class="{ 'legendary-icon': kanji.rarity === 'legendary', 'mythic-icon': kanji.rarity === 'mythic' }"
+                      :style="kanji.rarity !== 'legendary' && kanji.rarity !== 'mythic' ? { backgroundColor: rarityConfig[kanji.rarity].color } : {}">
+                    <BookOpen class="w-4 h-4" />
+                  </div>
+                  Compounds & Usage
+                </h3>
+                
+                <div class="flex-1 overflow-y-auto custom-scroll">
+                  <div class="flex flex-col gap-3 pr-3 pt-2 pb-6">
+                    <div 
+                      v-for="(compound, index) in kanji.compounds" 
+                      :key="index"
+                      class="bg-white/20 border-2 rounded-xl p-4 opacity-0 -translate-x-4 transition-all duration-300 compound-item"
+                      :class="{ 'opacity-100 translate-x-0': contentVisible, [kanji.rarity + '-compound']: true }"
+                      :style="{ transitionDelay: `${index * 0.1}s` }"
+                    >
+                      <div class="flex items-center gap-3 mb-3 pb-2 border-b border-white/15">
+                        <div class="text-3xl font-black font-japanese text-gray-900">{{ compound.kanji }}</div>
+                        <div class="text-xl font-bold text-slate-800">{{ compound.reading }}</div>
                       </div>
                       
-                      <div v-if="compound.kanjiBreakdown" class="text-sm text-slate-700">
-                        <span class="font-bold text-slate-600 mr-2">Breakdown:</span>
-                        {{ compound.kanjiBreakdown }}
-                      </div>
-                      
-                      <div v-if="compound.explanation" class="text-xs text-slate-600 italic mt-2 pt-2 border-t border-white/15 leading-relaxed">
-                        {{ compound.explanation }}
+                      <div class="space-y-2">
+                        <div class="text-base text-slate-700">
+                          <span class="font-bold text-slate-600 mr-2">Meaning:</span>
+                          {{ compound.meaning }}
+                        </div>
+                        
+                        <div v-if="compound.kanjiBreakdown" class="text-base text-slate-700">
+                          <span class="font-bold text-slate-600 mr-2">Breakdown:</span>
+                          {{ compound.kanjiBreakdown }}
+                        </div>
+                        
+                        <div v-if="compound.explanation" class="text-sm text-slate-600 italic mt-2 pt-2 border-t border-white/15 leading-relaxed">
+                          {{ compound.explanation }}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
           </div>
         </div>
       </div>
@@ -361,6 +418,158 @@ const handleClose = () => {
 /* 3D Flip Animation */
 .flip-container.flipped {
   transform: rotateY(180deg);
+}
+
+/* COULEURS KANJI PAR RARETÉ */
+.common .japanese-char {
+  color: #50C5B7 !important;
+}
+
+.rare .japanese-char {
+  color: #496DDB !important;
+}
+
+.legendary .japanese-char {
+  background: linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(139, 95, 184, 0.3));
+}
+
+.mythic .japanese-char {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: mythicKanjiGlow 4s ease infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* Bordures des compounds par rareté */
+.common-compound {
+  border-color: rgba(80, 197, 183, 0.4);
+  box-shadow: 0 2px 8px rgba(80, 197, 183, 0.1);
+}
+
+.rare-compound {
+  border-color: rgba(73, 109, 219, 0.4);
+  box-shadow: 0 2px 8px rgba(73, 109, 219, 0.1);
+}
+
+.legendary-compound {
+  border-color: rgba(222, 192, 241, 0.4);
+  box-shadow: 0 2px 8px rgba(222, 192, 241, 0.1);
+}
+
+.mythic-compound {
+  border: 3px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%) border-box;
+  box-shadow: 0 2px 12px rgba(255, 215, 0, 0.2);
+}
+
+/* Hover effects pour les compounds */
+.compound-item:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.common-compound:hover {
+  border-color: rgba(80, 197, 183, 0.6);
+  box-shadow: 0 4px 16px rgba(80, 197, 183, 0.2);
+}
+
+.rare-compound:hover {
+  border-color: rgba(73, 109, 219, 0.6);
+  box-shadow: 0 4px 16px rgba(73, 109, 219, 0.2);
+}
+
+.legendary-compound:hover {
+  border-color: rgba(222, 192, 241, 0.6);
+  box-shadow: 0 4px 16px rgba(222, 192, 241, 0.2);
+}
+
+
+/* Icônes avec dégradés par rareté */
+.legendary-icon {
+  background: linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%);
+}
+
+.mythic-icon {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%);
+  background-size: 200% 200%;
+  animation: mythicIconGlow 4s ease infinite;
+}
+
+@keyframes mythicIconGlow {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 0%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Badge légendaire avec dégradé fixe */
+.legendary-badge {
+  background: linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%);
+  box-shadow: 0 2px 12px rgba(222, 192, 241, 0.5);
+}
+
+/* Badge mythic avec dégradé animé */
+.mythic-badge {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%);
+  background-size: 200% 200%;
+  animation: mythicBadgeGlow 4s ease infinite;
+  box-shadow: 0 2px 15px rgba(255, 215, 0, 0.4);
+}
+
+@keyframes mythicBadgeGlow {
+  0% { 
+    background-position: 0% 50%;
+    box-shadow: 0 2px 15px rgba(255, 215, 0, 0.4);
+  }
+  25% { 
+    background-position: 50% 0%;
+    box-shadow: 0 2px 15px rgba(255, 140, 0, 0.6);
+  }
+  50% { 
+    background-position: 100% 50%;
+    box-shadow: 0 2px 15px rgba(220, 20, 60, 0.4);
+  }
+  75% { 
+    background-position: 50% 100%;
+    box-shadow: 0 2px 15px rgba(255, 165, 0, 0.6);
+  }
+  100% { 
+    background-position: 0% 50%;
+    box-shadow: 0 2px 15px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* Animation pour le kanji mythique */
+@keyframes mythicKanjiGlow {
+  0% { 
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  }
+  25% { 
+    background-position: 50% 0%;
+    filter: drop-shadow(0 0 12px rgba(255, 140, 0, 0.8));
+  }
+  50% { 
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 8px rgba(220, 20, 60, 0.6));
+  }
+  75% { 
+    background-position: 50% 100%;
+    filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.8));
+  }
+  100% { 
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  }
 }
 
 /* Mythic shimmer */
@@ -449,19 +658,6 @@ const handleClose = () => {
   .flip-container {
     height: min(80vh, 600px) !important;
     min-height: 450px !important;
-  }
-}
-
-/* Performance */
-@media (prefers-reduced-motion: reduce) {
-  .flip-container,
-  .mythic-shimmer,
-  .floating-particle {
-    animation: none !important;
-  }
-  
-  .flip-container.flipped {
-    transform: rotateY(180deg);
   }
 }
 </style>

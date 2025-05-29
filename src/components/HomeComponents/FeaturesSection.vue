@@ -314,19 +314,19 @@ onUnmounted(() => {
 
 /* Couleurs spécifiques pour chaque boule selon votre palette */
 .choice:nth-child(1) .ball {
-  background-color: #DEC0F1; /* Mauve */
+  background-color: #EFD9CE; /* Cream */
 }
 
 .choice:nth-child(2) .ball {
-  background-color: #50C5B7; /* Verdigris */
+  background-color: #DEC0F1; /* Mauve */
 }
 
 .choice:nth-child(3) .ball {
-  background-color: #496DDB; /* Royal Blue */
+  background-color: #50C5B7; /* Verdigris */
 }
 
 .choice:nth-child(4) .ball {
-  background-color: #14342B; /* Dark green */
+  background-color: #496DDB; /* Royal Blue */
 }
 
 .choice-circle:checked + .ball {

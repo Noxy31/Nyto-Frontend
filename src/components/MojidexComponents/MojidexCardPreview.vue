@@ -77,7 +77,7 @@ const rarityConfig = {
     borderColor: '#496DDB'
   },
   legendary: { 
-    color: '#DEC0F1', 
+    color: 'linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%)', 
     glow: '0 0 30px rgba(222, 192, 241, 0.6)',
     borderColor: '#DEC0F1'
   },
@@ -106,7 +106,9 @@ const cardStyle = computed(() => ({
   >
     <div class="card-inner" :style="cardStyle">
       <!-- Rarity badge -->
-      <div class="rarity-badge" :style="{ backgroundColor: rarityConfig[props.rarity].color }">
+      <div class="rarity-badge" 
+           :class="{ 'mythic-badge': props.rarity === 'mythic', 'legendary-badge': props.rarity === 'legendary' }"
+           :style="props.rarity !== 'mythic' && props.rarity !== 'legendary' ? { backgroundColor: rarityConfig[props.rarity].color } : {}">
         {{ props.rarity }}
       </div>
       
@@ -136,7 +138,7 @@ const cardStyle = computed(() => ({
           {{ props.unlocked ? props.name : '???' }}
         </h4>
         <div v-if="props.unlocked" class="kanji-container">
-          <span class="japanese-char" :style="{ color: props.color }">{{ props.japanese }}</span>
+          <span class="japanese-char">{{ props.japanese }}</span>
           <span class="separator">-</span>
           <span class="romaji">{{ props.romaji }}</span>
         </div>
@@ -228,23 +230,29 @@ const cardStyle = computed(() => ({
   background-position: center, center;
 }
 
-/* Mythic card border animation - OPTIMISATION : durée réduite */
+/* Mythic card border animation - MÊME DÉGRADÉ QUE LE KANJI */
 .mythic {
   position: relative;
   padding: 3px;
   border-radius: 23px;
   overflow: hidden;
-  background: linear-gradient(90deg, #EFD9CE 0%, #DEC0F1 20%, #50C5B7 40%, #496DDB 60%, #14342B 80%, #EFD9CE 100%);
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%);
   background-size: 200% 200%;
-  animation: borderGradientMove 6s ease infinite; /* Réduit de 8s à 6s */
+  animation: borderGradientMove 4s ease infinite; /* Synchronisé avec le kanji */
 }
 
 @keyframes borderGradientMove {
   0% { 
     background-position: 0% 50%;
   }
+  25% { 
+    background-position: 50% 0%;
+  }
   50% { 
     background-position: 100% 50%;
+  }
+  75% { 
+    background-position: 50% 100%;
   }
   100% { 
     background-position: 0% 50%;
@@ -280,7 +288,7 @@ const cardStyle = computed(() => ({
   100% { transform: rotate(45deg) translateX(100%); }
 }
 
-/* Content styles - GARDÉS IDENTIQUES */
+/* Content styles - AVEC BADGE MYTHIC */
 .rarity-badge {
   position: absolute;
   top: 10px;
@@ -295,23 +303,61 @@ const cardStyle = computed(() => ({
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* FIXED IMAGE CONTAINER */
+/* Badge légendaire avec dégradé fixe */
+.legendary-badge {
+  background: linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%);
+  box-shadow: 0 2px 12px rgba(222, 192, 241, 0.5);
+}
+
+/* Badge mythic avec dégradé animé */
+.mythic-badge {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%);
+  background-size: 200% 200%;
+  animation: mythicBadgeGlow 4s ease infinite;
+  box-shadow: 0 2px 15px rgba(255, 215, 0, 0.4);
+}
+
+@keyframes mythicBadgeGlow {
+  0% { 
+    background-position: 0% 50%;
+    box-shadow: 0 2px 15px rgba(255, 215, 0, 0.4);
+  }
+  25% { 
+    background-position: 50% 0%;
+    box-shadow: 0 2px 15px rgba(255, 140, 0, 0.6);
+  }
+  50% { 
+    background-position: 100% 50%;
+    box-shadow: 0 2px 15px rgba(220, 20, 60, 0.4);
+  }
+  75% { 
+    background-position: 50% 100%;
+    box-shadow: 0 2px 15px rgba(255, 165, 0, 0.6);
+  }
+  100% { 
+    background-position: 0% 50%;
+    box-shadow: 0 2px 15px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* CONTAINER D'IMAGE ADAPTATIF */
 .yokai-image-container {
   width: 100%;
-  /* Utiliser aspect-ratio pour maintenir 4:3 automatiquement */
-  aspect-ratio: 4 / 3;
+  height: auto; /* Laisse l'image définir la hauteur */
+  min-height: 150px; /* Hauteur minimum pour la cohérence */
+  max-height: 250px; /* Hauteur maximum pour éviter les cartes trop grandes */
   margin-bottom: 0.4rem;
   position: relative;
   overflow: hidden;
   border-radius: 15px;
-  
-  /* Hauteur calculée automatiquement basée sur la largeur */
-  /* Plus besoin de height: 200px fixe ! */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .yokai-image {
   width: 100%;
-  height: 100%;
+  height: auto; /* S'adapte à l'image */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -323,21 +369,16 @@ const cardStyle = computed(() => ({
 
 .yokai-img {
   width: 100%;
-  height: 100%;
-  /* Comme l'image ET le container sont 4:3, object-fit: fill est parfait */
-  object-fit: fill; /* Remplit exactement sans déformation car même ratio */
+  height: auto; /* GARDE LE RATIO NATUREL */
+  object-fit: contain; /* JAMAIS de déformation */
+  object-position: center; /* Centre l'image */
   border-radius: 15px;
   display: block;
-  
-  /* Sécurités */
   max-width: 100%;
-  max-height: 100%;
-  
-  /* Performance */
+  max-height: 250px; /* Limite la hauteur max */
   transform: translateZ(0);
   backface-visibility: hidden;
 }
-
 
 .locked-icon {
   color: rgba(0, 0, 0, 0.3);
@@ -387,6 +428,57 @@ const cardStyle = computed(() => ({
   text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* COULEURS KANJI PAR RARETÉ - DYNAMIQUES */
+.common .japanese-char {
+  color: #50C5B7 !important;
+}
+
+.rare .japanese-char {
+  color: #496DDB !important;
+}
+
+.legendary .japanese-char {
+  background: linear-gradient(135deg, #DEC0F1 0%, #B19CD9 50%, #8B5FB8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(139, 95, 184, 0.3));
+}
+
+.mythic .japanese-char {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #DC143C 50%, #FFD700 75%, #FFA500 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: mythicKanjiGlow 4s ease infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* Animation pour le kanji mythique */
+@keyframes mythicKanjiGlow {
+  0% { 
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  }
+  25% { 
+    background-position: 50% 0%;
+    filter: drop-shadow(0 0 12px rgba(255, 140, 0, 0.8));
+  }
+  50% { 
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 8px rgba(220, 20, 60, 0.6));
+  }
+  75% { 
+    background-position: 50% 100%;
+    filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.8));
+  }
+  100% { 
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  }
+}
+
 .romaji {
   font-size: 1.2rem;
   color: #6A6262;
@@ -401,10 +493,10 @@ const cardStyle = computed(() => ({
 /* Quote styling - FIXED HEIGHT */
 .quote-container {
   position: relative;
-  margin-top: auto; /* Push to bottom */
+  margin-top: auto;
   padding: 0.5rem 1.5rem;
   text-align: center;
-  height: 80px; /* Fixed height for consistent card size */
+  height: 80px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -412,12 +504,12 @@ const cardStyle = computed(() => ({
 }
 
 .quote-text {
-  font-size: 0.75rem; /* Slightly smaller */
+  font-size: 0.75rem;
   line-height: 1.2;
   font-style: italic;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -425,7 +517,7 @@ const cardStyle = computed(() => ({
 
 .quote-mark {
   position: absolute;
-  font-size: 1.5rem; /* Smaller quote marks */
+  font-size: 1.5rem;
   opacity: 0.4;
   font-family: serif;
 }
@@ -442,7 +534,7 @@ const cardStyle = computed(() => ({
 
 /* Quote colors by rarity - DARKER FOR BETTER VISIBILITY */
 .common .quote-text {
-  color: #6A9690; /* Darkened from #8CB8B0 */
+  color: #6A9690;
 }
 
 .common .quote-mark {
@@ -450,7 +542,7 @@ const cardStyle = computed(() => ({
 }
 
 .rare .quote-text {
-  color: #6B85D0; /* Darkened from #8DA3E8 */
+  color: #6B85D0;
 }
 
 .rare .quote-mark {
@@ -458,7 +550,7 @@ const cardStyle = computed(() => ({
 }
 
 .legendary .quote-text {
-  color: #AA9BBF; /* Darkened from #C7B8D9 */
+  color: #AA9BBF;
 }
 
 .legendary .quote-mark {
@@ -466,7 +558,7 @@ const cardStyle = computed(() => ({
 }
 
 .mythic .quote-text {
-  color: #90775F; /* Darkened from #B09680 */
+  color: #90775F;
 }
 
 .mythic .quote-mark {
@@ -475,10 +567,6 @@ const cardStyle = computed(() => ({
 
 /* OPTIMISATION : Responsive adjustments */
 @media (max-width: 768px) {
-  .yokai-image-container {
-    height: 180px; /* Slightly smaller on mobile but still fixed */
-  }
-  
   .japanese-char {
     font-size: 3rem;
   }
@@ -488,7 +576,17 @@ const cardStyle = computed(() => ({
   }
   
   .quote-container {
-    height: 70px; /* Slightly smaller on mobile */
+    height: 70px;
+  }
+}
+
+/* OPTIMISATION : Performance */
+@media (prefers-reduced-motion: reduce) {
+  .yokai-card.mythic,
+  .mythic,
+  .card-shimmer,
+  .mythic .japanese-char {
+    animation: none !important;
   }
 }
 
