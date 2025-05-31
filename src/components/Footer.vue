@@ -1,5 +1,62 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+// Import des logos statiquement
+import Logo1 from '@/assets/Logos/Logo1.png'
+import LogoDarkMode from '@/assets/Logos/Logo-DarkMode.png'
+
+// State pour détecter le dark mode
+const isDarkMode = ref(false)
+
+// Logo dynamique selon le thème
+const logoSrc = computed(() => {
+  return isDarkMode.value ? LogoDarkMode : Logo1
+})
+
+// Observer les changements de thème
+const themeObserver = ref<MutationObserver | null>(null)
+
+// Fonction pour détecter le mode dark
+const detectDarkMode = () => {
+  isDarkMode.value = document.documentElement.classList.contains('dark') || 
+                     document.body.classList.contains('dark')
+}
+
+// Observer les changements de thème
+const setupThemeObserver = () => {
+  // Détection initiale
+  detectDarkMode()
+  
+  themeObserver.value = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        detectDarkMode()
+      }
+    })
+  })
+  
+  // Observer les changements de classe sur html et body
+  themeObserver.value.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+  
+  themeObserver.value.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+}
+
+onMounted(() => {
+  setupThemeObserver()
+})
+
+onUnmounted(() => {
+  if (themeObserver.value) {
+    themeObserver.value.disconnect()
+    themeObserver.value = null
+  }
+})
 </script>
 
 <template>
@@ -10,7 +67,12 @@ import { ref } from 'vue';
         <div class="flex flex-col md:flex-row items-center gap-6">
           <!-- Logo -->
           <div class="flex items-center">
-            <img src="@/assets/Logos/Logo1.png" alt="Nyto.ai Logo" class="h-10 md:h-12 transition-transform duration-300 hover:scale-105" />
+            <img 
+              :src="logoSrc" 
+              alt="Nyto.ai Logo" 
+              class="h-10 md:h-12 transition-transform duration-300 hover:scale-105"
+              :key="logoSrc"
+            />
           </div>
         </div>
        
@@ -55,12 +117,8 @@ import { ref } from 'vue';
 }
 
 .dark .footer-bg {
-  background: linear-gradient(135deg,
-    #1f2937 0%,
-    rgba(55, 65, 81, 0.4) 50%,
-    rgba(31, 41, 55, 0.3) 100%
-  );
-  border-top: 1px solid rgba(156, 163, 175, 0.2);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-top: 1px solid rgba(80, 197, 183, 0.3);
 }
 
 /* Logo styling with dark mode */
@@ -118,7 +176,7 @@ import { ref } from 'vue';
 }
 
 .dark .developer-credit {
-  color: var(--color-dark-green);
+  color: white;
   opacity: 0.9;
 }
 
@@ -129,7 +187,7 @@ import { ref } from 'vue';
 }
 
 .dark .developer-name {
-  color: var(--color-dark-green);
+  color: var(--color-teal);
 }
 
 .copyright {
@@ -139,7 +197,7 @@ import { ref } from 'vue';
 }
 
 .dark .copyright {
-  color: var(--color-dark-green);
+  color: white;
   opacity: 0.8;
 }
 
@@ -154,7 +212,7 @@ import { ref } from 'vue';
 }
 
 .dark .legal-links {
-  color: var(--color-dark-green);
+  color: white;
   opacity: 0.8;
 }
 
@@ -170,7 +228,7 @@ import { ref } from 'vue';
 }
 
 .dark .legal-link {
-  color: var(--color-dark-green);
+  color: white;
   opacity: 0.9;
 }
 
@@ -186,6 +244,7 @@ import { ref } from 'vue';
 
 .dark .separator {
   opacity: 0.6;
+  color: white;
 }
 
 /* Responsive */
