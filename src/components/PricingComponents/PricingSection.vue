@@ -265,8 +265,8 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
   
-  /* Mode clair */
-  background: linear-gradient(135deg, var(--color-cream) 0%, #f8f9fa 100%);
+  /* Mode clair - fond blanc avec orbes colorées comme en dark mode mais inversé */
+  background: #ffffff;
 }
 
 .dark .pricing-section {
@@ -291,7 +291,7 @@ onMounted(() => {
 .orb-1 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, var(--color-teal) 0%, transparent 70%);
+  background: radial-gradient(circle, #50C5B7 0%, transparent 70%);
   top: 10%;
   left: -10%;
 }
@@ -299,7 +299,7 @@ onMounted(() => {
 .orb-2 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, var(--color-blue) 0%, transparent 70%);
+  background: radial-gradient(circle, #496DDB 0%, transparent 70%);
   top: 60%;
   right: -5%;
 }
@@ -307,7 +307,7 @@ onMounted(() => {
 .orb-3 {
   width: 250px;
   height: 250px;
-  background: radial-gradient(circle, var(--color-lavender) 0%, transparent 70%);
+  background: radial-gradient(circle, #DEC0F1 0%, transparent 70%);
   bottom: 20%;
   left: 50%;
   transform: translateX(-50%);
