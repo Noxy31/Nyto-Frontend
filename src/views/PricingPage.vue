@@ -117,7 +117,7 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
 /* Styles minimaux pour scroll fluide (repris de HomeView) */
 html {
   scroll-behavior: smooth;

@@ -89,8 +89,7 @@ const goToLogin = () => {
 const setActiveSection = (section: string) => {
   // Si on n'est pas sur la page d'accueil, y retourner d'abord
   if (router.currentRoute.value.name !== 'Home') {
-    // Stocker la section cible dans l'état de la route
-    router.push({ name: 'Home', hash: `#${section}` }).then(() => {
+    router.push('/').then(() => {
       // Attendre que la navigation soit terminée puis faire le scroll
       setTimeout(() => {
         scrollToSection(section)
