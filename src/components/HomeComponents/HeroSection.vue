@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { GraduationCap, Target, BookOpen, TrendingUp } from 'lucide-vue-next'
+
+// Router
+const router = useRouter()
 
 // Props
 interface HeroSectionProps {
@@ -10,6 +14,19 @@ const props = defineProps<HeroSectionProps>()
 
 // Animation state
 const textVisible = ref(false)
+
+// Navigation functions
+const goToPricing = () => {
+  router.push('/pricing')
+}
+
+const goToMojidex = () => {
+  // TODO: Implémenter la navigation vers Mojidex ou scroll vers la section showcase
+  const showcaseElement = document.getElementById('showcase')
+  if (showcaseElement) {
+    showcaseElement.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 
 // Optimisation: constantes pour éviter les recalculs
 const symbols = [
@@ -86,10 +103,14 @@ onMounted(() => {
             </p>
             
             <div class="hero-buttons">
-              <button class="btn-primary">
+              <button 
+                @click="goToPricing"
+                class="btn-primary">
                 Start Learning Now
               </button>
-              <button class="btn-secondary">
+              <button 
+                @click="goToMojidex"
+                class="btn-secondary">
                 <BookOpen class="w-5 h-5 mr-2" />
                 Explore Mojidex
               </button>
@@ -341,6 +362,8 @@ onMounted(() => {
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(80, 197, 183, 0.3);
   letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -371,6 +394,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   box-shadow: 0 4px 15px rgba(73, 109, 219, 0.2);
+  cursor: pointer;
 }
 
 .btn-secondary:hover {
@@ -695,6 +719,15 @@ onMounted(() => {
 .element-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Variables CSS */
+:root {
+  --color-cream: #EFD9CE;
+  --color-lavender: #DEC0F1;
+  --color-teal: #50C5B7;
+  --color-blue: #496DDB;
+  --color-dark-green: #14342B;
 }
 
 /* Responsive */

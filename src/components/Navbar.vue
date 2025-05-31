@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { Home, Star, Library, Tag, LogIn } from 'lucide-vue-next'
 import LightSwitch from '@/components/LightSwitch.vue'
 
 // Import des logos statiquement
 import Logo1 from '@/assets/Logos/Logo1.png'
 import LogoDarkMode from '@/assets/Logos/Logo-DarkMode.png'
+
+// Router
+const router = useRouter()
 
 // Props & Emits
 interface NavbarProps {
@@ -22,6 +26,17 @@ const lastScrollPosition = ref(0)
 const isScrolled = ref(false)
 const isNavigating = ref(false)
 const isDarkMode = ref(false)
+
+// Computed pour savoir si on est sur la home page
+const isOnHomePage = computed(() => router.currentRoute.value.name === 'Home')
+
+// Computed pour déterminer l'item actif dans la navbar
+const activeNavItem = computed(() => {
+  if (!isOnHomePage.value) {
+    return '' // Aucun item actif si on n'est pas sur la home page
+  }
+  return activeSection.value
+})
 
 // Optimisation: utiliser des variables plutôt que des refs pour les timeouts
 let navigationTimeout: ReturnType<typeof setTimeout> | null = null
@@ -55,7 +70,39 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 
+// Navigation vers la page pricing
+const goToPricing = () => {
+  router.push('/pricing').then(() => {
+    // Force le scroll en haut après la navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  })
+  isMenuOpen.value = false
+}
+
+// Navigation vers la page de connexion (à implémenter plus tard)
+const goToLogin = () => {
+  // TODO: Implémenter la page de connexion
+  console.log('Redirection vers la page de connexion')
+  isMenuOpen.value = false
+}
+
 const setActiveSection = (section: string) => {
+  // Si on n'est pas sur la page d'accueil, y retourner d'abord
+  if (router.currentRoute.value.name !== 'Home') {
+    // Stocker la section cible dans l'état de la route
+    router.push({ name: 'Home', hash: `#${section}` }).then(() => {
+      // Attendre que la navigation soit terminée puis faire le scroll
+      setTimeout(() => {
+        scrollToSection(section)
+      }, 100)
+    })
+    return
+  }
+  
+  scrollToSection(section)
+}
+
+const scrollToSection = (section: string) => {
   activeSection.value = section
   isMenuOpen.value = false
   isNavigating.value = true
@@ -250,21 +297,25 @@ onUnmounted(() => {
               :key="item.id"
               @click="setActiveSection(item.id)"
               class="px-4 py-2.5 rounded-full nav-item transition-all duration-300 relative overflow-hidden group text-sm"
-              :class="activeSection === item.id ? 'nav-item-active' : ''">
+              :class="activeNavItem === item.id ? 'nav-item-active' : ''">
               <span class="relative z-10 flex items-center">
                 <component :is="item.icon" class="w-4 h-4 mr-2" />
                 {{ item.label }}
               </span>
               <span class="absolute inset-0 nav-item-bg transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
-                    :class="{'scale-x-100': activeSection === item.id}"></span>
+                    :class="{'scale-x-100': activeNavItem === item.id}"></span>
             </button>
           </div>
           
           <div class="ml-6 pl-6 border-l nav-divider flex items-center space-x-3">
-            <button class="px-5 py-2.5 rounded-md nav-cta-button transition-all duration-300 transform hover:-translate-y-1 text-sm">
+            <button 
+              @click="goToPricing"
+              class="px-5 py-2.5 rounded-md nav-cta-button transition-all duration-300 transform hover:-translate-y-1 text-sm">
               Start Learning
             </button>
-            <button class="px-5 py-2.5 rounded-md nav-login-button transition-all duration-300 transform hover:-translate-y-1 text-sm flex items-center">
+            <button 
+              @click="goToLogin"
+              class="px-5 py-2.5 rounded-md nav-login-button transition-all duration-300 transform hover:-translate-y-1 text-sm flex items-center">
               <LogIn class="w-4 h-4 mr-2" />
               Log In
             </button>
@@ -306,16 +357,20 @@ onUnmounted(() => {
           :key="item.id"
           @click="setActiveSection(item.id)"
           class="block w-full text-left py-3 px-4 rounded-lg transition-all duration-200 flex items-center"
-          :class="activeSection === item.id ? 'mobile-nav-active' : 'mobile-nav-item'">
+          :class="activeNavItem === item.id ? 'mobile-nav-active' : 'mobile-nav-item'">
           <component :is="item.icon" class="w-5 h-5 mr-3" />
           {{ item.label }}
         </button>
         
         <div class="flex flex-col space-y-3 mt-5">
-          <button class="w-full p-3 rounded-md mobile-cta transition-all duration-300">
+          <button 
+            @click="goToPricing"
+            class="w-full p-3 rounded-md mobile-cta transition-all duration-300">
             Start Learning
           </button>
-          <button class="w-full p-3 rounded-md mobile-login transition-all duration-300 flex items-center justify-center">
+          <button 
+            @click="goToLogin"
+            class="w-full p-3 rounded-md mobile-login transition-all duration-300 flex items-center justify-center">
             <LogIn class="w-5 h-5 mr-2" />
             Log In
           </button>
@@ -583,7 +638,7 @@ button:hover .top-line:not(.rotate-45) {
   transform: translateY(-7px);
 }
 
-button:hover .bottom-line:not(.-rotate-45) {
+.bottom-line:not(.-rotate-45) {
   transform: translateY(7px);
 }
 </style>
